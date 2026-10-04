@@ -1,3 +1,4 @@
+import type { LatestEvals } from "@/lib/evals";
 import type {
   Estimate,
   ExportRequest,
@@ -125,6 +126,11 @@ export async function getRateCard(): Promise<RateCard> {
 
 export async function getSamples(): Promise<SampleBid[]> {
   return (await request("/samples")).json();
+}
+
+/** The newest eval result of each model. Rejects with status 404 if none exists. */
+export async function getLatestEvals(): Promise<LatestEvals> {
+  return (await request("/evals/latest")).json();
 }
 
 export async function draftFromFile(file: File): Promise<Estimate> {

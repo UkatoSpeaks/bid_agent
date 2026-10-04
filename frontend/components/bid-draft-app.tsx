@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownIcon, FileTextIcon, ShieldCheckIcon } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -125,6 +126,9 @@ export function BidDraftApp() {
             <a href="#what-comes-back" className="hover:text-ink">
               What comes back
             </a>
+            <Link href="/evals" className="hover:text-ink">
+              Evals
+            </Link>
           </nav>
           {handedOff ? (
             <Button size="lg" className="h-9 px-4" onClick={startOver}>
@@ -288,7 +292,12 @@ export function BidDraftApp() {
       <footer className="border-t border-line">
         <Container className="flex flex-col gap-2 py-6 text-xs text-subtle sm:flex-row sm:justify-between">
           <p>Bid Draft Agent. The LLM extracts and classifies; company data and code price.</p>
-          <p>Sample data is for a fictional company.</p>
+          <p>
+            Sample data is for a fictional company.{" "}
+            <Link href="/evals" className="underline underline-offset-2 hover:text-ink">
+              How it is evaluated
+            </Link>
+          </p>
         </Container>
       </footer>
 

@@ -1,0 +1,81 @@
+# VERIFIED BY HAND: no
+#
+# Synthetic eval bid evals/cases/bids/per_plans_no_rate.pdf (see evals/make_eval_bids.py).
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: per_plans_no_rate
+title: "A \"per plans\" line, an item with no standard rate, item numbers that change format"
+bid_file: bids/per_plans_no_rate.pdf
+
+planted_problems:
+  - "item H-05 says \"per plans\" and is a lump sum"
+  - "item H-04 (hydronic unit heater) has no standard rate"
+  - "item numbers change format partway: 1, 2, 3, then H-04 to H-06, then 7.a and 7.b"
+  - "descriptions in a different word order from the rate card"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "1"
+    description: "Packaged rooftop unit, 10 ton, set by crane"
+    quantity: "1"
+    unit: "EA"
+    production_rate: PR-RTU-10T-CRANE
+  - item_number: "2"
+    description: "Spiral duct, 12\" round"
+    quantity: "640"
+    unit: "LF"
+    production_rate: PR-DUCT-SPIRAL-12
+  - item_number: "3"
+    description: "Volume control dampers, 12\""
+    quantity: "8"
+    unit: "EA"
+    production_rate: PR-DAMPER-VCD-12
+  # The item numbers change format from here.
+  - item_number: "H-04"
+    description: "Hydronic unit heater, 60 MBH, furnish and install"
+    quantity: "4"
+    unit: "EA"
+    production_rate: none
+    required_flags:
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "item with no standard rate"
+  - item_number: "H-05"
+    description: "Ductwork modifications per plans"
+    quantity: "1"
+    unit: "LS"
+    production_rate: none
+    required_flags:
+      - VAGUE_SCOPE
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "\"per plans\" vague line"
+  - item_number: "H-06"
+    description: "Return air grilles, 20 x 20"
+    quantity: "14"
+    unit: "EA"
+    production_rate: PR-GRILLE-RET
+    problem: "item number format change"
+  - item_number: "7.a"
+    description: "Thermostats, programmable"
+    quantity: "5"
+    unit: "EA"
+    production_rate: PR-TSTAT-PROG
+    problem: "item number format change"
+  - item_number: "7.b"
+    description: "Refrigerant R-454B, system charge"
+    quantity: "22"
+    unit: "LB"
+    production_rate: PR-REFRIG-CHARGE
+    problem: "item number format change"
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "p1-t1-r1"
+    text: "ITEM | DESCRIPTION OF WORK | QTY | UNIT"
+    why: "column header"

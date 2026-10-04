@@ -1,0 +1,79 @@
+# VERIFIED BY HAND: no
+#
+# Synthetic eval bid evals/cases/bids/mismatch_allowance.pdf (see evals/make_eval_bids.py).
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: mismatch_allowance
+title: "A unit that does not fit its standard rate, an allowance and a total row mid-table"
+bid_file: bids/mismatch_allowance.pdf
+
+planted_problems:
+  - "item M-4 is duct wrap in LF, but the standard rate PR-INSUL-WRAP is per SF"
+  - "item M-6 is an allowance: a lump sum with no defined content and no standard rate"
+  - "a total row in the middle of the table that does not start with the word Total"
+  - "a quantity with a thousands separator (1,800)"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "M-1"
+    description: "5-ton condensing unit, furnish and install"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-CU-5T
+  - item_number: "M-2"
+    description: "5-ton air handler, furnish and install"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-AHU-5T
+  - item_number: "M-3"
+    description: "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-LINESET-50
+  # The work is duct wrap, so the rate is PR-INSUL-WRAP, but that rate is per SF and
+  # the line is in LF. The pipeline must choose the rate and block the line with
+  # UNIT_MISMATCH; the line then adds 0 to the total, as it does in the gold total.
+  - item_number: "M-4"
+    description: "Duct wrap insulation, R-6 foil-faced"
+    quantity: "900"
+    unit: "LF"
+    production_rate: PR-INSUL-WRAP
+    required_flags:
+      - UNIT_MISMATCH
+    allowed_flags: [NO_COMPONENTS]
+    problem: "unit mismatches its standard rate"
+  # Written "1,800" in the document.
+  - item_number: "M-5"
+    description: "Galvanized sheet metal ductwork, fabricated and installed"
+    quantity: "1800"
+    unit: "LB"
+    production_rate: PR-DUCT-RECT-GALV
+  - item_number: "M-6"
+    description: "Controls wiring allowance"
+    quantity: "1"
+    unit: "LS"
+    production_rate: none
+    required_flags:
+      - VAGUE_SCOPE
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "lump-sum allowance"
+  - item_number: "M-7"
+    description: "Supply register, 10 x 6"
+    quantity: "24"
+    unit: "EA"
+    production_rate: PR-REG-SUP
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "p1-t1-r1"
+    text: "ITEM | DESCRIPTION | QTY | UNIT"
+    why: "column header"
+  - ref: "p1-t1-r5"
+    text: " | Equipment items total | 6 | "
+    why: "total row mid-table"

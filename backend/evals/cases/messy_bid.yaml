@@ -1,0 +1,100 @@
+# VERIFIED BY HAND: no
+#
+# Sample bid data/bids/messy_bid.pdf.
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: messy_bid
+title: "Messy bid: section titles, a subtotal, mixed unit spellings, one vague item"
+bid_file: ../../data/bids/messy_bid.pdf
+
+planted_problems:
+  - "section title rows"
+  - "a subtotal row mid-table"
+  - "units spelled each / ea. / lin. ft / Each"
+  - "quantities with thousands separators"
+  - "a vague lump sum with no standard rate (B5)"
+  - "descriptions that leave the size open (A4, B4)"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "A1"
+    description: "Packaged rooftop unit, 10 ton, set by crane"
+    quantity: "3"
+    unit: "EA"
+    production_rate: PR-RTU-10T-CRANE
+  - item_number: "A2"
+    description: "5-ton split system: condensing unit"
+    quantity: "2"
+    unit: "each"
+    production_rate: PR-CU-5T
+  - item_number: "A3"
+    description: "5-ton split system: air handler"
+    quantity: "2"
+    unit: "each"
+    production_rate: PR-AHU-5T
+  - item_number: "A4"
+    description: "Refrigerant line sets, 50 ft"
+    quantity: "2"
+    unit: "ea."
+    production_rate: PR-LINESET-50
+  # Written "1,150" in the document.
+  - item_number: "B1"
+    description: "Spiral duct, 12\" round"
+    quantity: "1150"
+    unit: "LF"
+    production_rate: PR-DUCT-SPIRAL-12
+  - item_number: "B2"
+    description: "8\" flex duct to diffusers"
+    quantity: "275"
+    unit: "lin. ft"
+    production_rate: PR-DUCT-FLEX-8
+  # Written "2,400" in the document.
+  - item_number: "B3"
+    description: "Duct insulation wrap (R-6)"
+    quantity: "2400"
+    unit: "SF"
+    production_rate: PR-INSUL-WRAP
+  # No size is stated. PR-REG-SUP is the only supply register rate.
+  - item_number: "B4"
+    description: "Supply registers"
+    quantity: "64"
+    unit: "Each"
+    production_rate: PR-REG-SUP
+  - item_number: "B5"
+    description: "Misc. ductwork modifications as required"
+    quantity: "1"
+    unit: "LS"
+    production_rate: none
+    required_flags:
+      - VAGUE_SCOPE
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "vague lump sum with no standard rate"
+  - item_number: "C1"
+    description: "Thermostats, programmable"
+    quantity: "11"
+    unit: "EA"
+    production_rate: PR-TSTAT-PROG
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "p1-t1-r1"
+    text: "ITEM | DESCRIPTION OF WORK | QTY | UNIT"
+    why: "column header"
+  - ref: "p1-t1-r2"
+    text: "SECTION A - EQUIPMENT |  |  | "
+    why: "section title"
+  - ref: "p1-t1-r7"
+    text: " | Subtotal Section A | 9 | "
+    why: "subtotal row mid-table"
+  - ref: "p1-t1-r8"
+    text: "SECTION B - AIR DISTRIBUTION |  |  | "
+    why: "section title"
+  - ref: "p1-t1-r14"
+    text: "SECTION C - CONTROLS |  |  | "
+    why: "section title"

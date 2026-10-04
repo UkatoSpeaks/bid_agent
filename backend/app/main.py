@@ -3,12 +3,14 @@
 import re
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
+from app.eval_results import latest_eval_results
 from app.export import AuditEntry, build_workbook
 from app.llm import LLMClient, LLMConfigError, LLMError, LLMRateLimitError, get_llm_client
 from app.parsing import SUPPORTED_EXTENSIONS, DocumentParseError, UnsupportedFileTypeError
@@ -81,6 +83,27 @@ def get_rate_card(card: RateCard = Depends(rate_card)) -> RateCard:
 def list_samples() -> list[SampleBid]:
     """The sample bid schedules that can be drafted without an upload."""
     return SAMPLE_BIDS
+
+
+class LatestEvals(BaseModel):
+    """The newest eval result of each model (see evals/run_evals.py), newest first."""
+
+    results: list[dict[str, Any]]
+
+
+@app.get("/evals/latest")
+def get_latest_evals() -> LatestEvals:
+    """The latest eval results, one per model, read from evals/results/.
+
+    404 if no eval has been run yet.
+    """
+    results = latest_eval_results()
+    if not results:
+        raise HTTPException(
+            status_code=404,
+            detail="No eval results yet. Run `uv run python evals/run_evals.py` in backend/.",
+        )
+    return LatestEvals(results=results)
 
 
 @app.post("/estimates/draft")

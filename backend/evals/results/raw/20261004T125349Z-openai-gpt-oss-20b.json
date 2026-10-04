@@ -1,0 +1,2105 @@
+{
+  "meta": {
+    "run_id": "20261004T125349Z-openai-gpt-oss-20b",
+    "model": "openai/gpt-oss-20b",
+    "temperature": 0.2,
+    "reasoning_effort": "medium",
+    "runs_per_case": 1,
+    "started_at": "2026-10-04T12:53:49+00:00",
+    "finished_at": null,
+    "complete": false,
+    "stopped_because": "stopped by hand before the plan was finished",
+    "stability_runs": 3,
+    "stability_cases": [
+      "clean_bid",
+      "messy_bid",
+      "tricky_bid"
+    ]
+  },
+  "runs": {
+    "clean_bid": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 4.732,
+        "rate_limit_wait_seconds": 0.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4812,
+        "completion_tokens": 2741,
+        "total_tokens": 7553,
+        "grand_total": "86425.60",
+        "standard_only_total": "86425.60",
+        "lines": [
+          {
+            "item_number": "1",
+            "description": "Furnish and install 3-ton condensing unit",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R2",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "13409.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 21.6% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Furnish and install 3\u2011ton condensing unit matches PR\u2011CU\u20113T."
+          },
+          {
+            "item_number": "2",
+            "description": "Furnish and install 3-ton air handler",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R3",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "9620.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 15.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Furnish and install 3\u2011ton air handler matches PR\u2011AHU\u20113T."
+          },
+          {
+            "item_number": "3",
+            "description": "Furnish and install 5-ton condensing unit",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R4",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 16.1% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Furnish and install 5\u2011ton condensing unit matches PR\u2011CU\u20115T."
+          },
+          {
+            "item_number": "4",
+            "description": "Furnish and install 5-ton air handler",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R5",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Furnish and install 5\u2011ton air handler matches PR\u2011AHU\u20115T."
+          },
+          {
+            "item_number": "5",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated",
+            "quantity": "6",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "4056.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated matches PR\u2011LINESET\u201150."
+          },
+          {
+            "item_number": "6",
+            "description": "12 in. spiral round duct, installed",
+            "quantity": "480",
+            "unit": "LF",
+            "source_ref": "Bid Schedule!R7",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "12259.20",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 18.6% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 12 in spiral round duct installed."
+          },
+          {
+            "item_number": "7",
+            "description": "8 in. insulated flexible duct, installed",
+            "quantity": "350",
+            "unit": "LF",
+            "source_ref": "Bid Schedule!R8",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2975.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 8 in insulated flexible duct installed."
+          },
+          {
+            "item_number": "8",
+            "description": "Programmable thermostat, installed and wired",
+            "quantity": "6",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R9",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "1560.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches programmable thermostat installed and wired."
+          },
+          {
+            "item_number": "9",
+            "description": "Supply register, 10 x 6",
+            "quantity": "48",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R10",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "2112.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register 10x6 installed."
+          },
+          {
+            "item_number": "10",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "12",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R11",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "912.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille 20x20 installed."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 47.794,
+        "rate_limit_wait_seconds": 43.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4812,
+        "completion_tokens": 2230,
+        "total_tokens": 7042,
+        "grand_total": "86425.60",
+        "standard_only_total": "86425.60",
+        "lines": [
+          {
+            "item_number": "1",
+            "description": "Furnish and install 3-ton condensing unit",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R2",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "13409.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 21.6% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton condensing unit furnishing and installation."
+          },
+          {
+            "item_number": "2",
+            "description": "Furnish and install 3-ton air handler",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R3",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "9620.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 15.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton air handler furnishing and installation."
+          },
+          {
+            "item_number": "3",
+            "description": "Furnish and install 5-ton condensing unit",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R4",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 16.1% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton condensing unit furnishing and installation."
+          },
+          {
+            "item_number": "4",
+            "description": "Furnish and install 5-ton air handler",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R5",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton air handler furnishing and installation."
+          },
+          {
+            "item_number": "5",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated",
+            "quantity": "6",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "4056.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3/8 x 7/8, 50 ft insulated refrigerant line set furnishing and installation."
+          },
+          {
+            "item_number": "6",
+            "description": "12 in. spiral round duct, installed",
+            "quantity": "480",
+            "unit": "LF",
+            "source_ref": "Bid Schedule!R7",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "12259.20",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 18.6% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 12 in spiral round duct installed."
+          },
+          {
+            "item_number": "7",
+            "description": "8 in. insulated flexible duct, installed",
+            "quantity": "350",
+            "unit": "LF",
+            "source_ref": "Bid Schedule!R8",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2975.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 8 in insulated flexible duct installed."
+          },
+          {
+            "item_number": "8",
+            "description": "Programmable thermostat, installed and wired",
+            "quantity": "6",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R9",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "1560.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches programmable thermostat installed and wired."
+          },
+          {
+            "item_number": "9",
+            "description": "Supply register, 10 x 6",
+            "quantity": "48",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R10",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "2112.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register 10x6 installed."
+          },
+          {
+            "item_number": "10",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "12",
+            "unit": "EA",
+            "source_ref": "Bid Schedule!R11",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "912.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille 20x20 installed."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "format_change": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 44.652,
+        "rate_limit_wait_seconds": 39.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4714,
+        "completion_tokens": 2954,
+        "total_tokens": 7668,
+        "grand_total": "61942.92",
+        "standard_only_total": "61591.28",
+        "lines": [
+          {
+            "item_number": "1.01",
+            "description": "3-ton condensing unit, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r2",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "6704.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 15.1% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton condensing unit furnish and install."
+          },
+          {
+            "item_number": "1.02",
+            "description": "3-ton air handler, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "4810.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton air handler furnish and install."
+          },
+          {
+            "item_number": "1.03",
+            "description": "Line sets, 50 ft, insulated",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 50\u2011ft insulated line set."
+          },
+          {
+            "item_number": "Item 4",
+            "description": "Spiral round duct, 12 in",
+            "quantity": "1075",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r5",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "27455.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 58.2% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches spiral round duct up to 12 in diameter."
+          },
+          {
+            "item_number": "Item 5",
+            "description": "Flex duct, 8 in, insulated",
+            "quantity": "260",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2210.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches insulated flexible duct 8 in."
+          },
+          {
+            "item_number": "Item 5",
+            "description": "Flex duct, 8 in, insulated",
+            "quantity": "260",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r7",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2210.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches insulated flexible duct, 8 in, installed."
+          },
+          {
+            "item_number": "F",
+            "description": "Supply registers, 10 x 6",
+            "quantity": "36",
+            "unit": "each",
+            "source_ref": "p1-t1-r8",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1584.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register, 10 x 6, installed."
+          },
+          {
+            "item_number": "G",
+            "description": "Remove and dispose of existing ductwork",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "296.00",
+            "flags": [
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 2 hrs per LS of LAB-TECH (HVAC Technician); 1 hrs per LS of LAB-APPR (Apprentice); 1 hrs per LS of LAB-SHMT (Sheet Metal Worker)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: Removal and disposal of existing ductwork requires labor; no standard rate available."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "Removal and disposal of existing ductwork requires labor; no standard rate available."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 40.44,
+        "rate_limit_wait_seconds": 34.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4714,
+        "completion_tokens": 3798,
+        "total_tokens": 8512,
+        "grand_total": "61942.92",
+        "standard_only_total": "61591.28",
+        "lines": [
+          {
+            "item_number": "1.01",
+            "description": "3-ton condensing unit, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r2",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "6704.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 15.1% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton condensing unit furnish and install."
+          },
+          {
+            "item_number": "1.02",
+            "description": "3-ton air handler, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "4810.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3\u2011ton air handler furnish and install."
+          },
+          {
+            "item_number": "1.03",
+            "description": "Line sets, 50 ft, insulated",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 50\u2011ft insulated line set."
+          },
+          {
+            "item_number": "Item 4",
+            "description": "Spiral round duct, 12 in",
+            "quantity": "1075",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r5",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "27455.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 58.2% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches spiral round duct up to 12 in."
+          },
+          {
+            "item_number": "Item 5",
+            "description": "Flex duct, 8 in, insulated",
+            "quantity": "260",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2210.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches insulated flexible duct 8 in."
+          },
+          {
+            "item_number": "Item 5",
+            "description": "Flex duct, 8 in, insulated",
+            "quantity": "260",
+            "unit": "linear feet",
+            "source_ref": "p1-t1-r7",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2210.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches insulated 8 in flexible duct installation per linear foot."
+          },
+          {
+            "item_number": "F",
+            "description": "Supply registers, 10 x 6",
+            "quantity": "36",
+            "unit": "each",
+            "source_ref": "p1-t1-r8",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1584.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register 10x6 installation per unit."
+          },
+          {
+            "item_number": "G",
+            "description": "Remove and dispose of existing ductwork",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "296.00",
+            "flags": [
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 2 hrs per LS of LAB-TECH (HVAC Technician); 1 hrs per LS of LAB-APPR (Apprentice); 1 hrs per LS of LAB-SHMT (Sheet Metal Worker)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: Removal and disposal of existing ductwork not covered by standard rates; estimates provided."
+              },
+              {
+                "code": "NO_RATE_CARD_MATCH",
+                "severity": "warning",
+                "message": "No standard production rate for removal of existing ductwork; labor estimates provided."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "Removal and disposal of existing ductwork not covered by standard rates; estimates provided."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "messy_bid": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 77.922,
+        "rate_limit_wait_seconds": 69.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4924,
+        "completion_tokens": 3480,
+        "total_tokens": 8404,
+        "grand_total": "156238.65",
+        "standard_only_total": "156036.69",
+        "lines": [
+          {
+            "item_number": "A1",
+            "description": "Packaged rooftop unit, 10 ton, set by crane",
+            "quantity": "3",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-RTU-10T-CRANE",
+            "rate_basis": "standard",
+            "line_subtotal": "51681.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 47.0% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the 10\u2011ton packaged rooftop unit set by crane, same unit and description."
+          },
+          {
+            "item_number": "A2",
+            "description": "5-ton split system: condensing unit",
+            "quantity": "2",
+            "unit": "each",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the 5\u2011ton split system condensing unit."
+          },
+          {
+            "item_number": "A3",
+            "description": "5-ton split system: air handler",
+            "quantity": "2",
+            "unit": "each",
+            "source_ref": "p1-t1-r5",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the 5\u2011ton split system air handler."
+          },
+          {
+            "item_number": "A4",
+            "description": "Refrigerant line sets, 50 ft",
+            "quantity": "2",
+            "unit": "ea.",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the 50\u2011ft refrigerant line set."
+          },
+          {
+            "item_number": "B1",
+            "description": "Spiral duct, 12\" round",
+            "quantity": "1150",
+            "unit": "LF",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "29371.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 24.7% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the spiral round duct up to 12 in diameter."
+          },
+          {
+            "item_number": "B2",
+            "description": "8\" flex duct to diffusers",
+            "quantity": "275",
+            "unit": "lin. ft",
+            "source_ref": "p1-t1-r10",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2337.50",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 8\" flexible duct installation."
+          },
+          {
+            "item_number": "B3",
+            "description": "Duct insulation wrap (R-6)",
+            "quantity": "2400",
+            "unit": "SF",
+            "source_ref": "p1-t1-r11",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "standard",
+            "line_subtotal": "6492.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches R-6 duct wrap insulation installation."
+          },
+          {
+            "item_number": "B4",
+            "description": "Supply registers",
+            "quantity": "64",
+            "unit": "Each",
+            "source_ref": "p1-t1-r12",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "2816.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register installation."
+          },
+          {
+            "item_number": "B5",
+            "description": "Misc. ductwork modifications as required",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r13",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "170.00",
+            "flags": [
+              {
+                "code": "EXTRACTION_NOTE",
+                "severity": "info",
+                "message": "Vague: 'as required'"
+              },
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "as required. Description contains 'as required', 'misc.'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 2 hrs per LS of LAB-TECH (HVAC Technician)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: Generic labor for ductwork modifications."
+              },
+              {
+                "code": "NO_RATE_CARD_MATCH",
+                "severity": "warning",
+                "message": "No standard production rate covers miscellaneous ductwork modifications."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "Generic labor for ductwork modifications."
+          },
+          {
+            "item_number": "C1",
+            "description": "Thermostats, programmable",
+            "quantity": "11",
+            "unit": "EA",
+            "source_ref": "p1-t1-r15",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "2860.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches programmable thermostat installation."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 58.653,
+        "rate_limit_wait_seconds": 51.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4846,
+        "completion_tokens": 3987,
+        "total_tokens": 8833,
+        "grand_total": "157012.17",
+        "standard_only_total": "156036.69",
+        "lines": [
+          {
+            "item_number": "A1",
+            "description": "Packaged rooftop unit, 10 ton, set by crane",
+            "quantity": "3",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-RTU-10T-CRANE",
+            "rate_basis": "standard",
+            "line_subtotal": "51681.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 46.8% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches packaged rooftop unit, 10\u202fton set by crane."
+          },
+          {
+            "item_number": "A2",
+            "description": "5-ton split system: condensing unit",
+            "quantity": "2",
+            "unit": "each",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton split system condensing unit."
+          },
+          {
+            "item_number": "A3",
+            "description": "5-ton split system: air handler",
+            "quantity": "2",
+            "unit": "each",
+            "source_ref": "p1-t1-r5",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton split system air handler."
+          },
+          {
+            "item_number": "A4",
+            "description": "Refrigerant line sets, 50 ft",
+            "quantity": "2",
+            "unit": "ea.",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches refrigerant line set, 50\u202fft."
+          },
+          {
+            "item_number": "B1",
+            "description": "Spiral duct, 12\" round",
+            "quantity": "1150",
+            "unit": "LF",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "29371.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 24.6% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches spiral round duct up to 12\u202fin diameter."
+          },
+          {
+            "item_number": "B2",
+            "description": "8\" flex duct to diffusers",
+            "quantity": "275",
+            "unit": "lin. ft",
+            "source_ref": "p1-t1-r10",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2337.50",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for 8\" flexible duct installation."
+          },
+          {
+            "item_number": "B3",
+            "description": "Duct insulation wrap (R-6)",
+            "quantity": "2400",
+            "unit": "SF",
+            "source_ref": "p1-t1-r11",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "standard",
+            "line_subtotal": "6492.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for R-6 duct insulation wrap installation."
+          },
+          {
+            "item_number": "B4",
+            "description": "Supply registers",
+            "quantity": "64",
+            "unit": "Each",
+            "source_ref": "p1-t1-r12",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "2816.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for supply register installation."
+          },
+          {
+            "item_number": "B5",
+            "description": "Misc. ductwork modifications as required",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r13",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "780.50",
+            "flags": [
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "as required. Description contains 'as required', 'misc.'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 4 hrs per LS of LAB-TECH (HVAC Technician); 2 hrs per LS of LAB-APPR (Apprentice); 1 hrs per LS of LAB-SHMT (Sheet Metal Worker); 10 LB per LS of MAT-DUCT-GALV (Galvanized sheet metal ductwork, fabricated); 20 LF per LS of MAT-DUCT-FLEX-8 (Insulated flexible duct, 8 in); 5 LF per LS of MAT-DUCT-SPIRAL-12 (Spiral round duct, 12 in); 0.5 day per LS of EQ-LIFT-19 (Scissor lift, 19 ft)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: Generic ductwork modification work requiring labor, materials, and equipment per line set."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "Generic ductwork modification work requiring labor, materials, and equipment per line set."
+          },
+          {
+            "item_number": "C1",
+            "description": "Thermostats, programmable",
+            "quantity": "11",
+            "unit": "EA",
+            "source_ref": "p1-t1-r15",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "2860.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for programmable thermostat installation."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "mismatch_allowance": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 53.929,
+        "rate_limit_wait_seconds": 49.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4712,
+        "completion_tokens": 2334,
+        "total_tokens": 7046,
+        "grand_total": "46700.31",
+        "standard_only_total": "46591.02",
+        "lines": [
+          {
+            "item_number": "M-1",
+            "description": "5-ton condensing unit, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r2",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 29.9% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers a 5\u2011ton condensing unit furnished and installed."
+          },
+          {
+            "item_number": "M-2",
+            "description": "5-ton air handler, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 19.7% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers a 5\u2011ton air handler furnished and installed."
+          },
+          {
+            "item_number": "M-3",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers a 3/8 x 7/8, 50\u2011ft insulated refrigerant line set."
+          },
+          {
+            "item_number": "M-4",
+            "description": "Duct wrap insulation, R-6 foil-faced",
+            "quantity": "900",
+            "unit": "LF",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "none",
+            "line_subtotal": "0.00",
+            "flags": [
+              {
+                "code": "UNIT_MISMATCH",
+                "severity": "blocker",
+                "message": "The bid line is in 'LF' (LF) but production rate PR-INSUL-WRAP is per SF. Its components are not priced; convert the quantity or choose another rate."
+              },
+              {
+                "code": "NO_COMPONENTS",
+                "severity": "blocker",
+                "message": "Line has no cost components, so it is priced at 0."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers R\u20116 foil\u2011faced duct wrap insulation."
+          },
+          {
+            "item_number": "M-5",
+            "description": "Galvanized sheet metal ductwork, fabricated and installed",
+            "quantity": "1800",
+            "unit": "LB",
+            "source_ref": "p1-t1-r7",
+            "production_rate_code": "PR-DUCT-RECT-GALV",
+            "rate_basis": "standard",
+            "line_subtotal": "15048.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 43.5% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers fabricated and installed rectangular galvanized sheet metal ductwork."
+          },
+          {
+            "item_number": "M-6",
+            "description": "Controls wiring allowance",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r8",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "92.00",
+            "flags": [
+              {
+                "code": "EXTRACTION_NOTE",
+                "severity": "info",
+                "message": "Allowance for controls wiring"
+              },
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "allowance. Description contains 'allowance'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 1 hrs per LS of LAB-ELEC (Electrician)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: One hour of electrician labor per LS of controls wiring allowance."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "One hour of electrician labor per LS of controls wiring allowance."
+          },
+          {
+            "item_number": "M-7",
+            "description": "Supply register, 10 x 6",
+            "quantity": "24",
+            "unit": "EA",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1056.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers supply register 10x6 installation."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 47.504,
+        "rate_limit_wait_seconds": 41.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4712,
+        "completion_tokens": 3142,
+        "total_tokens": 7854,
+        "grand_total": "46700.31",
+        "standard_only_total": "46591.02",
+        "lines": [
+          {
+            "item_number": "M-1",
+            "description": "5-ton condensing unit, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r2",
+            "production_rate_code": "PR-CU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "9940.50",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 29.9% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton condensing unit furnish and install."
+          },
+          {
+            "item_number": "M-2",
+            "description": "5-ton air handler, furnish and install",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r3",
+            "production_rate_code": "PR-AHU-5T",
+            "rate_basis": "standard",
+            "line_subtotal": "6621.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 19.7% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 5\u2011ton air handler furnish and install."
+          },
+          {
+            "item_number": "M-3",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "p1-t1-r4",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "1352.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches refrigerant line set 3/8 x 7/8, 50 ft, insulated."
+          },
+          {
+            "item_number": "M-4",
+            "description": "Duct wrap insulation, R-6 foil-faced",
+            "quantity": "900",
+            "unit": "LF",
+            "source_ref": "p1-t1-r6",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "none",
+            "line_subtotal": "0.00",
+            "flags": [
+              {
+                "code": "UNIT_MISMATCH",
+                "severity": "blocker",
+                "message": "The bid line is in 'LF' (LF) but production rate PR-INSUL-WRAP is per SF. Its components are not priced; convert the quantity or choose another rate."
+              },
+              {
+                "code": "NO_COMPONENTS",
+                "severity": "blocker",
+                "message": "Line has no cost components, so it is priced at 0."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches duct wrap insulation R\u20116 foil\u2011faced."
+          },
+          {
+            "item_number": "M-5",
+            "description": "Galvanized sheet metal ductwork, fabricated and installed",
+            "quantity": "1800",
+            "unit": "LB",
+            "source_ref": "p1-t1-r7",
+            "production_rate_code": "PR-DUCT-RECT-GALV",
+            "rate_basis": "standard",
+            "line_subtotal": "15048.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 43.5% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches galvanized sheet metal ductwork fabricated and installed."
+          },
+          {
+            "item_number": "M-6",
+            "description": "Controls wiring allowance",
+            "quantity": "1",
+            "unit": "LS",
+            "source_ref": "p1-t1-r8",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "92.00",
+            "flags": [
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "Description contains 'allowance'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 1 hrs per LS of LAB-ELEC (Electrician)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: Assumes 1 hour of electrician labor per LS unit of controls wiring allowance."
+              },
+              {
+                "code": "NO_RATE_CARD_MATCH",
+                "severity": "warning",
+                "message": "Material components for wiring not available in rate card."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "Assumes 1 hour of electrician labor per LS unit of controls wiring allowance."
+          },
+          {
+            "item_number": "M-7",
+            "description": "Supply register, 10 x 6",
+            "quantity": "24",
+            "unit": "EA",
+            "source_ref": "p1-t1-r9",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1056.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers supply register 10x6 installation."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "per_plans_no_rate": [
+      {
+        "run": 1,
+        "status": "failed",
+        "error": "openai/gpt-oss-20b did not return a valid LineMappings after 2 attempts. Last error: Error code: 400 - {'error': {'message': \"max completion tokens reached before generating a valid document: the output was truncated to fit max_completion_tokens and is missing required content. Increase max_completion_tokens. See 'failed_generation' for the truncated output. Error: jsonschema: '/lines/4' does not validate with /properties/lines/items/$ref/required: missing properties: 'no_match_reason'\", 'type': 'invalid_request_error', 'code': 'json_validate_failed', 'failed_generation': '{\"lines\":[{\"line_id\":\"L001\",\"production_rate_code\":\"PR-RTU-10T-CRANE\",\"confidence\":\"high\",\"rationale\":\"Standard rate covers 10\u2011ton packaged rooftop unit installed by crane.\",\"proposed_components\":[],\"no_match_reason\":null},{\"line_id\":\"L002\",\"production_rate_code\":\"PR-DUCT-SPIRAL-12\",\"confidence\":\"high\",\"rationale\":\"Standard rate covers spiral round duct up to 12\\\\\" diameter installed.\",\"proposed_components\":[],\"no_match_reason\":null},{\"line_id\":\"L003\",\"production_rate_code\":\"PR-DAMPER-VCD-12\",\"confidence\":\"high\",\"rationale\":\"Standard rate covers 12\\\\\" volume control damper installed.\",\"proposed_components\":[],\"no_match_reason\":null},{\"line_id\":\"L004\",\"production_rate_code\":null,\"confidence\":\"medium\",\"rationale\":\"No standard rate for hydronic unit heater; labor and material components estimated.\",\"proposed_components\":[{\"rate_card_code\":\"LAB-TECH\",\"type\":\"labor\",\"quantity_per_unit\":\"4\",\"rationale\":\"4 hrs HVAC technician for installation\"},{\"rate_card_code\":\"LAB-APPR\",\"type\":\"labor\",\"quantity_per_unit\":\"2\",\"rationale\":\"2 hrs apprentice assistance\"},{\"rate_card_code\":\"LAB-SUPV\",\"type\":\"labor\",\"quantity_per_unit\":\"1\",\"rationale\":\"1 hr supervisor oversight\"},{\"rate_card_code\":\"LAB-ELEC\",\"type\":\"labor\",\"quantity_per_unit\":\"1\",\"rationale\":\"1 hr electrician for electrical connections\"}],\"no_match_reason\":null},{\"line_id\":\"L005\",\"production_rate_code\":null,\"confidence\":\"medium\",\"rationale\":\"No standard rate for ductwork modifications; labor, material, and equipment components estimated.\",\"proposed_components\":[{\"rate_card_code\":\"LAB-TECH\",\"type\":\"labor\",\"quantity_per_unit\":\"6\",\"rationale\":\"6 hrs HVAC technician for modifications\"},{\"rate_card_code\":\"LAB-SHMT\",\"type\":\"labor\",\"quantity_per_unit\":\"4\",\"rationale\":\"4 hrs sheet metal worker for fabricating modifications\"},{\"rate_card_code\":\"LAB-ELEC\",\"type\":\"labor\",\"quantity_per_unit\":\"2\",\"rationale\":\"2 hrs electrician for rewiring\"}]}]}'}}",
+        "seconds": 61.146,
+        "rate_limit_wait_seconds": 51.0,
+        "llm_calls": 1,
+        "prompt_tokens": 1005,
+        "completion_tokens": 1806,
+        "total_tokens": 2811,
+        "grand_total": "0",
+        "standard_only_total": "0",
+        "lines": [],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "failed",
+        "error": "openai/gpt-oss-20b did not return a valid LineMappings after 2 attempts. Last error: Error code: 400 - {'error': {'message': \"Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'json_validate_failed', 'failed_generation': ''}}",
+        "seconds": 68.27,
+        "rate_limit_wait_seconds": 60.0,
+        "llm_calls": 1,
+        "prompt_tokens": 1005,
+        "completion_tokens": 1505,
+        "total_tokens": 2510,
+        "grand_total": "0",
+        "standard_only_total": "0",
+        "lines": [],
+        "code_dropped_rows": []
+      }
+    ],
+    "split_and_duplicate": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 53.273,
+        "rate_limit_wait_seconds": 48.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4644,
+        "completion_tokens": 2363,
+        "total_tokens": 7007,
+        "grand_total": "57408.77",
+        "standard_only_total": "57408.77",
+        "lines": [
+          {
+            "item_number": "101",
+            "description": "Packaged rooftop unit, 10 ton, furnish and install,",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Form!R2",
+            "production_rate_code": "PR-RTU-10T-CRANE",
+            "rate_basis": "standard",
+            "line_subtotal": "34454.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 85.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches packaged rooftop unit 10 ton furnished and installed."
+          },
+          {
+            "item_number": "102",
+            "description": "Volume control damper, 12 in",
+            "quantity": "16",
+            "unit": "EA",
+            "source_ref": "Bid Form!R4",
+            "production_rate_code": "PR-DAMPER-VCD-12",
+            "rate_basis": "standard",
+            "line_subtotal": "2024.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches volume control damper 12 in installed."
+          },
+          {
+            "item_number": "103",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "10",
+            "unit": "EA",
+            "source_ref": "Bid Form!R5",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille 20x20 installed."
+          },
+          {
+            "item_number": "104",
+            "description": "Supply register, 10 x 6",
+            "quantity": "40",
+            "unit": "EA",
+            "source_ref": "Bid Form!R6",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register 10x6 installed."
+          },
+          {
+            "item_number": "103",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "10",
+            "unit": "EA",
+            "source_ref": "Bid Form!R7",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille 20x20 installed."
+          },
+          {
+            "item_number": "105",
+            "description": "Programmable thermostat, installed and wired",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Form!R8",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "1040.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the bid line exactly \u2013 programmable thermostat installed and wired."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 51.171,
+        "rate_limit_wait_seconds": 47.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4654,
+        "completion_tokens": 2170,
+        "total_tokens": 6824,
+        "grand_total": "57408.77",
+        "standard_only_total": "57408.77",
+        "lines": [
+          {
+            "item_number": "101",
+            "description": "Packaged rooftop unit, 10 ton, furnish and install, set by crane (crane by mechanical contractor)",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Bid Form!R2",
+            "production_rate_code": "PR-RTU-10T-CRANE",
+            "rate_basis": "standard",
+            "line_subtotal": "34454.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 85.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches packaged rooftop unit, 10\u202fton, furnish and install, set by crane."
+          },
+          {
+            "item_number": "102",
+            "description": "Volume control damper, 12 in",
+            "quantity": "16",
+            "unit": "EA",
+            "source_ref": "Bid Form!R4",
+            "production_rate_code": "PR-DAMPER-VCD-12",
+            "rate_basis": "standard",
+            "line_subtotal": "2024.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches volume control damper, 12\u202fin."
+          },
+          {
+            "item_number": "103",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "10",
+            "unit": "EA",
+            "source_ref": "Bid Form!R5",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille, 20\u202fx\u202f20."
+          },
+          {
+            "item_number": "104",
+            "description": "Supply register, 10 x 6",
+            "quantity": "40",
+            "unit": "EA",
+            "source_ref": "Bid Form!R6",
+            "production_rate_code": "PR-REG-SUP",
+            "rate_basis": "standard",
+            "line_subtotal": "1760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches supply register, 10\u202fx\u202f6."
+          },
+          {
+            "item_number": "103",
+            "description": "Return air grille, 20 x 20",
+            "quantity": "10",
+            "unit": "EA",
+            "source_ref": "Bid Form!R7",
+            "production_rate_code": "PR-GRILLE-RET",
+            "rate_basis": "standard",
+            "line_subtotal": "760.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches return air grille, 20\u202fx\u202f20."
+          },
+          {
+            "item_number": "105",
+            "description": "Programmable thermostat, installed and wired",
+            "quantity": "4",
+            "unit": "EA",
+            "source_ref": "Bid Form!R8",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "1040.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches the bid line exactly: programmable thermostat installed and wired, one unit."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "split_quantity": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 48.087,
+        "rate_limit_wait_seconds": 43.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4690,
+        "completion_tokens": 2764,
+        "total_tokens": 7454,
+        "grand_total": "101884.35",
+        "standard_only_total": "101480.43",
+        "lines": [
+          {
+            "item_number": "A1",
+            "description": "Split system condensing unit, 3 ton",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R4",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "16761.25",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 22.9% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers 3\u2011ton split system condensing unit installation."
+          },
+          {
+            "item_number": "A2",
+            "description": "Split system air handler, 3 ton",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R5",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "12025.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 16.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers 3\u2011ton split system air handler installation."
+          },
+          {
+            "item_number": "A3",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated, installed",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "3380.00",
+            "flags": [
+              {
+                "code": "QUANTITY_NOT_IN_SOURCE",
+                "severity": "blocker",
+                "message": "Quantity '5' does not appear in its source row [Schedule!R6]: \"A3 | Refrigerant line set, 3/8 x 7/8, 50 ft, |  | \". It may have been invented; check the document."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers 3/8 x 7/8, 50\u2011ft insulated line set installation."
+          },
+          {
+            "item_number": "B1",
+            "description": "Insulated flexible duct, 8 in",
+            "quantity": "425.5",
+            "unit": "Linear Feet",
+            "source_ref": "Schedule!R9",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "3616.75",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers 8\u2011in insulated flexible duct installation."
+          },
+          {
+            "item_number": "B2",
+            "description": "Rectangular galvanized ductwork, fabricated and installed",
+            "quantity": "4650",
+            "unit": "Pounds",
+            "source_ref": "Schedule!R10",
+            "production_rate_code": "PR-DUCT-RECT-GALV",
+            "rate_basis": "standard",
+            "line_subtotal": "38874.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 51.5% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Standard rate covers rectangular galvanized ductwork fabrication and installation."
+          },
+          {
+            "item_number": "B3",
+            "description": "Testing, adjusting and balancing allowance",
+            "quantity": "1",
+            "unit": "Lump Sum",
+            "source_ref": "Schedule!R11",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "340.00",
+            "flags": [
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "allowance. Description contains 'allowance'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 4 hrs per Lump Sum of LAB-TECH (HVAC Technician)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: No standard production rate covers testing, adjusting and balancing. Estimated 4 hrs of HVAC technician labor per unit."
+              },
+              {
+                "code": "NO_RATE_CARD_MATCH",
+                "severity": "warning",
+                "message": "No standard production rate covers testing, adjusting and balancing."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "No standard production rate covers testing, adjusting and balancing. Estimated 4 hrs of HVAC technician labor per unit."
+          }
+        ],
+        "code_dropped_rows": []
+      },
+      {
+        "run": 2,
+        "status": "ok",
+        "error": null,
+        "seconds": 51.286,
+        "rate_limit_wait_seconds": 46.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4690,
+        "completion_tokens": 2963,
+        "total_tokens": 7653,
+        "grand_total": "101884.35",
+        "standard_only_total": "101480.43",
+        "lines": [
+          {
+            "item_number": "A1",
+            "description": "Split system condensing unit, 3 ton",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R4",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "16761.25",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 22.9% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches split system condensing unit, 3 ton, furnish and install."
+          },
+          {
+            "item_number": "A2",
+            "description": "Split system air handler, 3 ton",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R5",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "12025.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 16.3% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches split system air handler, 3 ton, furnish and install."
+          },
+          {
+            "item_number": "A3",
+            "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated, installed",
+            "quantity": "5",
+            "unit": "Each",
+            "source_ref": "Schedule!R6",
+            "production_rate_code": "PR-LINESET-50",
+            "rate_basis": "standard",
+            "line_subtotal": "3380.00",
+            "flags": [
+              {
+                "code": "QUANTITY_NOT_IN_SOURCE",
+                "severity": "blocker",
+                "message": "Quantity '5' does not appear in its source row [Schedule!R6]: \"A3 | Refrigerant line set, 3/8 x 7/8, 50 ft, |  | \". It may have been invented; check the document."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches refrigerant line set, 3/8 x 7/8, 50 ft, insulated, installed."
+          },
+          {
+            "item_number": "B1",
+            "description": "Insulated flexible duct, 8 in",
+            "quantity": "425.5",
+            "unit": "Linear Feet",
+            "source_ref": "Schedule!R9",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "3616.75",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches insulated flexible duct, 8 in, installed."
+          },
+          {
+            "item_number": "B2",
+            "description": "Rectangular galvanized ductwork, fabricated and installed",
+            "quantity": "4650",
+            "unit": "Pounds",
+            "source_ref": "Schedule!R10",
+            "production_rate_code": "PR-DUCT-RECT-GALV",
+            "rate_basis": "standard",
+            "line_subtotal": "38874.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 51.5% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches rectangular galvanized ductwork, fabricated and installed, by weight."
+          },
+          {
+            "item_number": "B3",
+            "description": "Testing, adjusting and balancing allowance",
+            "quantity": "1",
+            "unit": "Lump Sum",
+            "source_ref": "Schedule!R11",
+            "production_rate_code": null,
+            "rate_basis": "assumed",
+            "line_subtotal": "340.00",
+            "flags": [
+              {
+                "code": "VAGUE_SCOPE",
+                "severity": "warning",
+                "message": "allowance. Description contains 'allowance'. Clarify the scope before relying on this line's price."
+              },
+              {
+                "code": "ASSUMED_PRODUCTION_RATE",
+                "severity": "warning",
+                "message": "No company production rate was used for this line. These quantities per unit were guessed by the LLM and must be checked: 4 hrs per Lump Sum of LAB-TECH (HVAC Technician)."
+              },
+              {
+                "code": "LOW_CONFIDENCE_MAPPING",
+                "severity": "warning",
+                "message": "Low confidence in the proposed components: No standard production rate covers testing, adjusting and balancing. Assumes HVAC technician labor."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "No standard production rate covers testing, adjusting and balancing. Assumes HVAC technician labor."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "tricky_bid": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 87.236,
+        "rate_limit_wait_seconds": 76.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4898,
+        "completion_tokens": 4196,
+        "total_tokens": 9094,
+        "grand_total": "97161.15",
+        "standard_only_total": "97161.15",
+        "lines": [
+          {
+            "item_number": "B-1",
+            "description": "Packaged rooftop unit, 10 ton, including crane set",
+            "quantity": "2",
+            "unit": "EA",
+            "source_ref": "Base Bid!R5",
+            "production_rate_code": "PR-RTU-10T-CRANE",
+            "rate_basis": "standard",
+            "line_subtotal": "34454.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 50.4% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches packaged rooftop unit 10\u202fton with crane set, same unit and description."
+          },
+          {
+            "item_number": "B-2",
+            "description": "Galvanized sheet metal ductwork, fabricated and installed",
+            "quantity": "3200",
+            "unit": "LB",
+            "source_ref": "Base Bid!R6",
+            "production_rate_code": "PR-DUCT-RECT-GALV",
+            "rate_basis": "standard",
+            "line_subtotal": "26752.00",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 37.1% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches galvanized sheet metal ductwork fabricated and installed, unit by weight."
+          },
+          {
+            "item_number": "B-3",
+            "description": "Duct wrap insulation, R-6 foil-faced",
+            "quantity": "1850.5",
+            "unit": "SF",
+            "source_ref": "Base Bid!R7",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "standard",
+            "line_subtotal": "5005.60",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches duct wrap insulation R\u20116 foil\u2011faced, installed."
+          },
+          {
+            "item_number": "B-4",
+            "description": "Volume control damper, 12 in",
+            "quantity": "14",
+            "unit": "EA",
+            "source_ref": "Base Bid!R8",
+            "production_rate_code": "PR-DAMPER-VCD-12",
+            "rate_basis": "standard",
+            "line_subtotal": "1771.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches volume control damper 12\u202fin, installed."
+          },
+          {
+            "item_number": "B-5",
+            "description": "Refrigerant R-454B, system charge",
+            "quantity": "0",
+            "unit": "LB",
+            "source_ref": "Base Bid!R9",
+            "production_rate_code": "PR-REFRIG-CHARGE",
+            "rate_basis": "standard",
+            "line_subtotal": "0.00",
+            "flags": [
+              {
+                "code": "QUANTITY_NOT_NUMERIC",
+                "severity": "blocker",
+                "message": "Quantity is written as 'TBD', which is not a number. The line is priced with quantity 0 until it is filled in."
+              },
+              {
+                "code": "ZERO_QUANTITY",
+                "severity": "warning",
+                "message": "Quantity is 0, so the line prices to 0."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches refrigerant R\u2011454B system charge, weighed in."
+          },
+          {
+            "item_number": "B-6",
+            "description": "Kitchen exhaust hood fire suppression system",
+            "quantity": "1",
+            "unit": "EA",
+            "source_ref": "Base Bid!R10",
+            "production_rate_code": null,
+            "rate_basis": "none",
+            "line_subtotal": "0.00",
+            "flags": [
+              {
+                "code": "NO_RATE_CARD_MATCH",
+                "severity": "warning",
+                "message": "No standard production rate or rate card entry matches kitchen exhaust hood fire suppression system; no components defined for this work."
+              },
+              {
+                "code": "NO_COMPONENTS",
+                "severity": "blocker",
+                "message": "Line has no cost components, so it is priced at 0."
+              }
+            ],
+            "mapping_confidence": "low",
+            "mapping_rationale": "No standard production rate or rate card entry matches kitchen exhaust hood fire suppression system; no components defined for this work."
+          },
+          {
+            "item_number": "ALT-1",
+            "description": "Add programmable thermostat at each exam room",
+            "quantity": "9",
+            "unit": "EA",
+            "source_ref": "Alternates!R3",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "2340.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches programmable thermostat installation."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ],
+    "units_in_words": [
+      {
+        "run": 1,
+        "status": "ok",
+        "error": null,
+        "seconds": 45.923,
+        "rate_limit_wait_seconds": 41.0,
+        "llm_calls": 3,
+        "prompt_tokens": 4722,
+        "completion_tokens": 2582,
+        "total_tokens": 7304,
+        "grand_total": "78521.77",
+        "standard_only_total": "78521.77",
+        "lines": [
+          {
+            "item_number": "1",
+            "description": "Furnish and install 3-ton condensing unit",
+            "quantity": "3",
+            "unit": "each",
+            "source_ref": "Bid Schedule!R5",
+            "production_rate_code": "PR-CU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "10056.75",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 17.8% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3-ton condensing unit furnish and install."
+          },
+          {
+            "item_number": "2",
+            "description": "Furnish and install 3-ton air handler",
+            "quantity": "3",
+            "unit": "each",
+            "source_ref": "Bid Schedule!R6",
+            "production_rate_code": "PR-AHU-3T",
+            "rate_basis": "standard",
+            "line_subtotal": "7215.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 3-ton air handler furnish and install."
+          },
+          {
+            "item_number": "3",
+            "description": "12 in. spiral round duct, installed",
+            "quantity": "1240",
+            "unit": "linear feet",
+            "source_ref": "Bid Schedule!R7",
+            "production_rate_code": "PR-DUCT-SPIRAL-12",
+            "rate_basis": "standard",
+            "line_subtotal": "31669.60",
+            "flags": [
+              {
+                "code": "HIGH_IMPACT_LINE",
+                "severity": "warning",
+                "message": "This line is 52.9% of the subtotal (threshold 15%). Check it first."
+              }
+            ],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 12 in spiral round duct installed."
+          },
+          {
+            "item_number": "4",
+            "description": "8 in. insulated flexible duct, installed",
+            "quantity": "312.5",
+            "unit": "lin. feet",
+            "source_ref": "Bid Schedule!R8",
+            "production_rate_code": "PR-DUCT-FLEX-8",
+            "rate_basis": "standard",
+            "line_subtotal": "2656.25",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches 8 in insulated flexible duct installed."
+          },
+          {
+            "item_number": "5",
+            "description": "Duct wrap insulation, R-6 foil-faced",
+            "quantity": "2150.75",
+            "unit": "square feet",
+            "source_ref": "Bid Schedule!R9",
+            "production_rate_code": "PR-INSUL-WRAP",
+            "rate_basis": "standard",
+            "line_subtotal": "5817.78",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches duct wrap insulation R-6 foil-faced installed."
+          },
+          {
+            "item_number": "6",
+            "description": "Refrigerant R-454B, system charge",
+            "quantity": "18.5",
+            "unit": "pounds",
+            "source_ref": "Bid Schedule!R10",
+            "production_rate_code": "PR-REFRIG-CHARGE",
+            "rate_basis": "standard",
+            "line_subtotal": "596.63",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for refrigerant charge."
+          },
+          {
+            "item_number": "7",
+            "description": "Programmable thermostat, installed and wired",
+            "quantity": "3",
+            "unit": "units",
+            "source_ref": "Bid Schedule!R11",
+            "production_rate_code": "PR-TSTAT-PROG",
+            "rate_basis": "standard",
+            "line_subtotal": "780.00",
+            "flags": [],
+            "mapping_confidence": "high",
+            "mapping_rationale": "Matches standard rate for programmable thermostat installation."
+          }
+        ],
+        "code_dropped_rows": []
+      }
+    ]
+  }
+}

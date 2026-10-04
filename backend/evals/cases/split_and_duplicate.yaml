@@ -1,0 +1,71 @@
+# VERIFIED BY HAND: no
+#
+# Synthetic eval bid evals/cases/bids/split_and_duplicate.xlsx (see evals/make_eval_bids.py).
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: split_and_duplicate
+title: "A description continued on a second row, and an item listed twice"
+bid_file: bids/split_and_duplicate.xlsx
+
+planted_problems:
+  - "the description of item 101 continues on the next row, which has no item number or quantity"
+  - "item 103 is listed twice, word for word"
+
+# Every bid line of the document, in document order.
+lines:
+  # Rows R2 and R3 are one item. R3 must not come back as a line of its own.
+  - item_number: "101"
+    description: "Packaged rooftop unit, 10 ton, furnish and install, set by crane (crane by mechanical contractor)"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-RTU-10T-CRANE
+    allowed_flags: [EXTRACTION_NOTE]
+    problem: "line split across two rows"
+  - item_number: "102"
+    description: "Volume control damper, 12 in"
+    quantity: "16"
+    unit: "EA"
+    production_rate: PR-DAMPER-VCD-12
+  # First of two identical rows (R5).
+  - item_number: "103"
+    description: "Return air grille, 20 x 20"
+    quantity: "10"
+    unit: "EA"
+    production_rate: PR-GRILLE-RET
+  - item_number: "104"
+    description: "Supply register, 10 x 6"
+    quantity: "40"
+    unit: "EA"
+    production_rate: PR-REG-SUP
+  # Second of two identical rows (R7). Both rows are in the document, so both are
+  # expected as lines (and both are in the gold total), but a duplicate must be
+  # pointed out to the estimator. The pipeline has no flag of its own for this, so
+  # the only thing that can satisfy the requirement is an EXTRACTION_NOTE that says
+  # so, on either copy.
+  - item_number: "103"
+    description: "Return air grille, 20 x 20"
+    quantity: "10"
+    unit: "EA"
+    production_rate: PR-GRILLE-RET
+    required_flags:
+      - {any_of: [EXTRACTION_NOTE], message_matches: "duplicat|repeat|twice|identical|listed again|appears again|same (item|line|number|description)", meaning: "points out the duplicate"}
+    problem: "duplicate item"
+  - item_number: "105"
+    description: "Programmable thermostat, installed and wired"
+    quantity: "4"
+    unit: "EA"
+    production_rate: PR-TSTAT-PROG
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "Bid Form!R1"
+    text: "Item No. | Description | Qty | Unit"
+    why: "column header"
+  - ref: "Bid Form!R3"
+    text: " | set by crane (crane by mechanical contractor) |  | "
+    why: "continuation of the description of item 101"

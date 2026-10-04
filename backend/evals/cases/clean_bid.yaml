@@ -1,0 +1,75 @@
+# VERIFIED BY HAND: no
+#
+# Sample bid data/bids/clean_bid.xlsx. Nothing is planted: this is the control case.
+# Every line has a company production rate and no flag is required.
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: clean_bid
+title: "Clean bid: a tidy table of 10 items"
+bid_file: ../../data/bids/clean_bid.xlsx
+
+planted_problems: []
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "1"
+    description: "Furnish and install 3-ton condensing unit"
+    quantity: "4"
+    unit: "EA"
+    production_rate: PR-CU-3T
+  - item_number: "2"
+    description: "Furnish and install 3-ton air handler"
+    quantity: "4"
+    unit: "EA"
+    production_rate: PR-AHU-3T
+  - item_number: "3"
+    description: "Furnish and install 5-ton condensing unit"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-CU-5T
+  - item_number: "4"
+    description: "Furnish and install 5-ton air handler"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-AHU-5T
+  - item_number: "5"
+    description: "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated"
+    quantity: "6"
+    unit: "EA"
+    production_rate: PR-LINESET-50
+  - item_number: "6"
+    description: "12 in. spiral round duct, installed"
+    quantity: "480"
+    unit: "LF"
+    production_rate: PR-DUCT-SPIRAL-12
+  - item_number: "7"
+    description: "8 in. insulated flexible duct, installed"
+    quantity: "350"
+    unit: "LF"
+    production_rate: PR-DUCT-FLEX-8
+  - item_number: "8"
+    description: "Programmable thermostat, installed and wired"
+    quantity: "6"
+    unit: "EA"
+    production_rate: PR-TSTAT-PROG
+  - item_number: "9"
+    description: "Supply register, 10 x 6"
+    quantity: "48"
+    unit: "EA"
+    production_rate: PR-REG-SUP
+  - item_number: "10"
+    description: "Return air grille, 20 x 20"
+    quantity: "12"
+    unit: "EA"
+    production_rate: PR-GRILLE-RET
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "Bid Schedule!R1"
+    text: "Item No. | Description | Qty | Unit"
+    why: "column header"

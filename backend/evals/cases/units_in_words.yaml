@@ -1,0 +1,80 @@
+# VERIFIED BY HAND: no
+#
+# Synthetic eval bid evals/cases/bids/units_in_words.xlsx (see evals/make_eval_bids.py).
+# No flag is required: every unit here normalises to its rate's unit (app/units.py),
+# so a correct run prices every line and raises nothing.
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: units_in_words
+title: "Units written in words, quantities with commas and decimals"
+bid_file: bids/units_in_words.xlsx
+
+planted_problems:
+  - "units written in words: each, linear feet, lin. feet, square feet, pounds, units"
+  - "quantities with a thousands separator (1,240 and 2,150.75)"
+  - "decimal quantities (312.5, 18.5)"
+  - "title rows above the table"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "1"
+    description: "Furnish and install 3-ton condensing unit"
+    quantity: "3"
+    unit: "each"
+    production_rate: PR-CU-3T
+    problem: "unit written in words"
+  - item_number: "2"
+    description: "Furnish and install 3-ton air handler"
+    quantity: "3"
+    unit: "each"
+    production_rate: PR-AHU-3T
+    problem: "unit written in words"
+  # Written "1,240" in the document.
+  - item_number: "3"
+    description: "12 in. spiral round duct, installed"
+    quantity: "1240"
+    unit: "linear feet"
+    production_rate: PR-DUCT-SPIRAL-12
+    problem: "unit written in words, quantity with a comma"
+  - item_number: "4"
+    description: "8 in. insulated flexible duct, installed"
+    quantity: "312.5"
+    unit: "lin. feet"
+    production_rate: PR-DUCT-FLEX-8
+    problem: "unit written in words, decimal quantity"
+  # Written "2,150.75" in the document.
+  - item_number: "5"
+    description: "Duct wrap insulation, R-6 foil-faced"
+    quantity: "2150.75"
+    unit: "square feet"
+    production_rate: PR-INSUL-WRAP
+    problem: "unit written in words, quantity with a comma"
+  - item_number: "6"
+    description: "Refrigerant R-454B, system charge"
+    quantity: "18.5"
+    unit: "pounds"
+    production_rate: PR-REFRIG-CHARGE
+    problem: "unit written in words, decimal quantity"
+  - item_number: "7"
+    description: "Programmable thermostat, installed and wired"
+    quantity: "3"
+    unit: "units"
+    production_rate: PR-TSTAT-PROG
+    problem: "unit written in words"
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "Bid Schedule!R1"
+    text: "Northline Mechanical - Bid Schedule |  |  | "
+    why: "document title"
+  - ref: "Bid Schedule!R2"
+    text: "Project: Riverside Branch Library, HVAC Replacement |  |  | "
+    why: "project title"
+  - ref: "Bid Schedule!R4"
+    text: "Item No. | Description | Qty | Unit"
+    why: "column header"

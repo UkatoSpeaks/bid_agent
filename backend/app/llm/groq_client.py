@@ -18,6 +18,8 @@ from app.llm.base import (
     LLMError,
     LLMRateLimitError,
     LLMResponseError,
+    LLMUnavailableError,
+    LLMUsage,
     T,
 )
 from app.llm.cache import ResponseCache, cache_key
@@ -62,6 +64,7 @@ class GroqLLMClient(LLMClient):
         self._reasoning_effort = reasoning_effort
         self._cache = cache
         self._sleep = sleep
+        self.usage = LLMUsage()
 
     def structured(self, prompt: str, schema: type[T]) -> T:
         json_schema = strict_json_schema(schema)
@@ -124,9 +127,12 @@ class GroqLLMClient(LLMClient):
             if "json_validate_failed" in str(exc):
                 raise _InvalidOutput(str(exc)) from exc
             raise LLMError(f"Groq rejected the request: {exc}") from exc
+        except (groq.APIConnectionError, groq.InternalServerError) as exc:
+            raise LLMUnavailableError(f"Groq could not be reached: {exc}") from exc
         except groq.APIError as exc:
             raise LLMError(f"Groq request failed: {exc}") from exc
 
+        self._record_usage(response)
         content = response.choices[0].message.content or ""
         try:
             return schema.model_validate_json(content)
@@ -151,8 +157,19 @@ class GroqLLMClient(LLMClient):
                     MAX_RATE_LIMIT_ATTEMPTS,
                     delay,
                 )
+                self.usage.rate_limit_waits += 1
+                self.usage.rate_limit_wait_seconds += delay
                 self._sleep(delay)
         raise AssertionError("unreachable")
+
+    def _record_usage(self, response: Any) -> None:
+        """Add one reply's token counts to `usage`, if Groq reported them."""
+        self.usage.calls += 1
+        reported = getattr(response, "usage", None)
+        for field in ("prompt_tokens", "completion_tokens", "total_tokens"):
+            count = getattr(reported, field, None)
+            if isinstance(count, int):
+                setattr(self.usage, field, getattr(self.usage, field) + count)
 
 
 class _InvalidOutput(Exception):

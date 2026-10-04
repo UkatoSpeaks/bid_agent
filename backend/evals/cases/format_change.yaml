@@ -1,0 +1,90 @@
+# VERIFIED BY HAND: no
+#
+# Synthetic eval bid evals/cases/bids/format_change.pdf (see evals/make_eval_bids.py).
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: format_change
+title: "Item numbers that change format twice, a duplicate and a bare lump sum"
+bid_file: bids/format_change.pdf
+
+planted_problems:
+  - "item numbers change format twice: 1.01 to 1.03, then \"Item 4\" and \"Item 5\", then F and G"
+  - "\"Item 5\" is listed twice, word for word"
+  - "units written in words: linear feet, each"
+  - "a quantity with a thousands separator (1,075)"
+  - "item G is a lump sum with no standard rate and none of the vague phrases the code check looks for"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "1.01"
+    description: "3-ton condensing unit, furnish and install"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-CU-3T
+  - item_number: "1.02"
+    description: "3-ton air handler, furnish and install"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-AHU-3T
+  - item_number: "1.03"
+    description: "Line sets, 50 ft, insulated"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-LINESET-50
+  # The item number is written "Item 4" and the quantity "1,075".
+  - item_number: "Item 4"
+    description: "Spiral round duct, 12 in"
+    quantity: "1075"
+    unit: "linear feet"
+    production_rate: PR-DUCT-SPIRAL-12
+    problem: "item number format change"
+  # First of two identical rows (r6).
+  - item_number: "Item 5"
+    description: "Flex duct, 8 in, insulated"
+    quantity: "260"
+    unit: "linear feet"
+    production_rate: PR-DUCT-FLEX-8
+    problem: "item number format change"
+  # Second of two identical rows (r7). As in split_and_duplicate: both rows are
+  # expected as lines, and an EXTRACTION_NOTE must point out the duplicate, on
+  # either copy.
+  - item_number: "Item 5"
+    description: "Flex duct, 8 in, insulated"
+    quantity: "260"
+    unit: "linear feet"
+    production_rate: PR-DUCT-FLEX-8
+    required_flags:
+      - {any_of: [EXTRACTION_NOTE], message_matches: "duplicat|repeat|twice|identical|listed again|appears again|same (item|line|number|description)", meaning: "points out the duplicate"}
+    problem: "duplicate item"
+  - item_number: "F"
+    description: "Supply registers, 10 x 6"
+    quantity: "36"
+    unit: "each"
+    production_rate: PR-REG-SUP
+    problem: "item number format change"
+  # JUDGMENT CALL, please check: a lump sum for demolition with no extent given.
+  # The extraction prompt calls "lump sums with no defined content" vague, so
+  # VAGUE_SCOPE is required here. No phrase in the description triggers the code
+  # check, so this flag depends on the LLM alone. If you think the scope is clear
+  # enough, move VAGUE_SCOPE from required_flags to allowed_flags.
+  - item_number: "G"
+    description: "Remove and dispose of existing ductwork"
+    quantity: "1"
+    unit: "LS"
+    production_rate: none
+    required_flags:
+      - VAGUE_SCOPE
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "lump sum with no defined content"
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "p1-t1-r1"
+    text: "NO. | DESCRIPTION | QUANTITY | UNIT"
+    why: "column header"

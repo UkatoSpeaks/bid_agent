@@ -1,0 +1,100 @@
+# VERIFIED BY HAND: no
+#
+# Sample bid data/bids/tricky_bid.xlsx.
+#
+# How to check this file: open the bid document and compare every line below
+# with it (item number, quantity, unit), check that production_rate is the
+# right code from data/rate_cards/hvac_rate_card.json (or none), and that the
+# required flags are the ones the planted problems call for. Then change the
+# first line to "# VERIFIED BY HAND: yes".
+
+id: tricky_bid
+title: "Tricky bid: two sheets, a TBD quantity, two items with no standard rate"
+bid_file: ../../data/bids/tricky_bid.xlsx
+
+planted_problems:
+  - "two sheets, each with its own header"
+  - "title rows above the table"
+  - "a quantity written as TBD (B-5)"
+  - "a decimal quantity (B-3)"
+  - "two items with no standard rate (B-6, ALT-3)"
+
+# Every bid line of the document, in document order.
+lines:
+  - item_number: "B-1"
+    description: "Packaged rooftop unit, 10 ton, including crane set"
+    quantity: "2"
+    unit: "EA"
+    production_rate: PR-RTU-10T-CRANE
+  - item_number: "B-2"
+    description: "Galvanized sheet metal ductwork, fabricated and installed"
+    quantity: "3200"
+    unit: "LB"
+    production_rate: PR-DUCT-RECT-GALV
+  - item_number: "B-3"
+    description: "Duct wrap insulation, R-6 foil-faced"
+    quantity: "1850.5"
+    unit: "SF"
+    production_rate: PR-INSUL-WRAP
+  - item_number: "B-4"
+    description: "Volume control damper, 12 in"
+    quantity: "14"
+    unit: "EA"
+    production_rate: PR-DAMPER-VCD-12
+  # No quantity is written, so the line must come back with quantity 0 and a
+  # QUANTITY_NOT_NUMERIC blocker. It adds 0 to the gold total.
+  - item_number: "B-5"
+    description: "Refrigerant R-454B, system charge"
+    quantity: "TBD"
+    unit: "LB"
+    production_rate: PR-REFRIG-CHARGE
+    required_flags:
+      - QUANTITY_NOT_NUMERIC
+    allowed_flags: [ZERO_QUANTITY, EXTRACTION_NOTE, VAGUE_SCOPE]
+    problem: "quantity written as TBD"
+  - item_number: "B-6"
+    description: "Kitchen exhaust hood fire suppression system"
+    quantity: "1"
+    unit: "EA"
+    production_rate: none
+    required_flags:
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "item with no standard rate"
+  - item_number: "ALT-1"
+    description: "Add programmable thermostat at each exam room"
+    quantity: "9"
+    unit: "EA"
+    production_rate: PR-TSTAT-PROG
+  - item_number: "ALT-2"
+    description: "Add return air grille, 20 x 20, at corridor"
+    quantity: "6"
+    unit: "EA"
+    production_rate: PR-GRILLE-RET
+  - item_number: "ALT-3"
+    description: "Recover refrigerant from existing rooftop units"
+    quantity: "3"
+    unit: "EA"
+    production_rate: none
+    required_flags:
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]
+    problem: "item with no standard rate"
+
+# Rows that must not come back as bid lines.
+skip_rows:
+  - ref: "Base Bid!R1"
+    text: "Northline Mechanical - Bid Schedule |  |  | "
+    why: "document title"
+  - ref: "Base Bid!R2"
+    text: "Project: Harbor Street Clinic, HVAC Renovation |  |  | "
+    why: "project title"
+  - ref: "Base Bid!R4"
+    text: "Item No. | Description | Qty | Unit"
+    why: "column header"
+  - ref: "Alternates!R1"
+    text: "Alternates (priced separately) |  |  | "
+    why: "sheet title"
+  - ref: "Alternates!R2"
+    text: "Item No. | Description | Qty | Unit"
+    why: "column header"

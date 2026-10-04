@@ -7,6 +7,8 @@ from app.llm.base import (
     LLMError,
     LLMRateLimitError,
     LLMResponseError,
+    LLMUnavailableError,
+    LLMUsage,
 )
 
 __all__ = [
@@ -15,6 +17,8 @@ __all__ = [
     "LLMError",
     "LLMRateLimitError",
     "LLMResponseError",
+    "LLMUnavailableError",
+    "LLMUsage",
     "get_llm_client",
 ]
 

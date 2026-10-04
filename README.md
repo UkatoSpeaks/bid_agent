@@ -7,7 +7,8 @@ into a draft, itemized estimate for a human estimator to review.
 the API: parse -> extract (LLM) -> map to production rates (LLM) -> price
 (code) -> review (code). The review UI in `frontend/` takes an estimator from
 handing off a bid to an approved, exported estimate. State lives in the
-browser; there is no database yet.
+browser; there is no database yet. `backend/evals/` scores the LLM steps
+against expected answers on nine synthetic bids; see [Evals](#evals).
 
 ## Quick start
 
@@ -214,7 +215,9 @@ reply with Pydantic, retries once with the validation error added to the
 prompt, and backs off exponentially on HTTP 429 (up to 4 attempts, honouring
 `Retry-After`). Parsed responses are cached in `backend/.cache/llm/`, keyed
 by model + prompt + schema + temperature + reasoning effort, so repeated runs
-do not call the API. Set `LLM_CACHE=false` to disable the cache.
+do not call the API. Set `LLM_CACHE=false` to disable the cache. The client
+counts its calls, the tokens Groq reports and the time spent waiting on rate
+limits in `LLMClient.usage`; cached replies are not counted.
 
 ## Reviewer edits and repricing
 
@@ -268,6 +271,14 @@ the top of `frontend/app/globals.css` (`--brand`, `--ink`, `--surface`,
 `--night`, the status colours, ...), and exposed as Tailwind utilities
 (`bg-brand`, `text-ink`, `border-line`, ...). The two fonts are chosen in
 `frontend/app/layout.tsx`.
+
+**The Evals page** (`/evals`, linked from the header) shows the newest eval
+of each model, loaded from `GET /evals/latest`: how many cases are
+hand-verified and that the dataset is synthetic, four headline numbers (flag
+recall, rate-mapping accuracy, grand total error, stability), the models side
+by side, a table of the cases in which every failure links to what was
+expected and what each run returned, and the known weaknesses. See
+[Evals](#evals).
 
 ### Screenshots to take for a demo
 
@@ -358,12 +369,174 @@ subtotal, and subtotal + overhead + profit is the grand total. Inside a
 percentage chain the input stays unrounded (tax uses the unrounded markup,
 profit the unrounded overhead). See the docstring in `engine.py`.
 
+## Evals
+
+`backend/evals/` measures the two LLM steps (extract, map) against expected
+answers, by running the whole pipeline on a set of bid schedules and comparing
+what comes back, line by line.
+
+**The dataset is synthetic.** All nine bid schedules were written for this
+project, for a fictional company, with problems planted on purpose. The scores
+say how the pipeline does on these nine cases; they are not a measurement on
+real bids. The expected answers were written together with the bids, and each
+expected file starts with `# VERIFIED BY HAND: no` until a person has checked
+it against the document and changed it to `yes`. Every report states how many
+cases are hand-verified; treat scores on the others as provisional.
+
+### The cases (`backend/evals/cases/`)
+
+| Case | Bid | Planted |
+| --- | --- | --- |
+| `clean_bid` | `data/bids/clean_bid.xlsx` | nothing: the control case |
+| `messy_bid` | `data/bids/messy_bid.pdf` | section titles, a subtotal mid-table, mixed unit spellings, a vague lump sum |
+| `tricky_bid` | `data/bids/tricky_bid.xlsx` | two sheets, a `TBD` quantity, two items with no standard rate |
+| `units_in_words` | `evals/cases/bids/units_in_words.xlsx` | units in words ("linear feet", "pounds"), quantities with commas and decimals |
+| `split_and_duplicate` | `evals/cases/bids/split_and_duplicate.xlsx` | a description continued on a second row, an item listed twice |
+| `mismatch_allowance` | `evals/cases/bids/mismatch_allowance.pdf` | a unit that does not fit its standard rate, an allowance, a total row mid-table |
+| `per_plans_no_rate` | `evals/cases/bids/per_plans_no_rate.pdf` | a "per plans" line, an item with no standard rate, item numbers that change format |
+| `split_quantity` | `evals/cases/bids/split_quantity.xlsx` | a line whose quantity is on its second row, a subtotal mid-table, an allowance |
+| `format_change` | `evals/cases/bids/format_change.pdf` | item numbers that change format twice, a duplicate, a bare lump sum |
+
+Each case is one YAML file. For every bid line it gives the item number,
+quantity, unit, the correct production rate code or `none`, and the flags
+that must appear; it also lists the rows that must be skipped:
+
+```yaml
+# VERIFIED BY HAND: no
+id: messy_bid
+bid_file: ../../data/bids/messy_bid.pdf
+lines:
+  - item_number: "B5"
+    description: "Misc. ductwork modifications as required"   # not scored
+    quantity: "1"
+    unit: "LS"
+    production_rate: none
+    required_flags:
+      - VAGUE_SCOPE
+      - {any_of: [ASSUMED_PRODUCTION_RATE, NO_RATE_CARD_MATCH, NO_COMPONENTS]}
+    allowed_flags: [LOW_CONFIDENCE_MAPPING]     # correct, but not required: not noise
+    problem: "vague lump sum with no standard rate"
+skip_rows:
+  - ref: "p1-t1-r7"
+    text: " | Subtotal Section A | 9 | "
+    why: "subtotal row mid-table"
+```
+
+A required flag is a code, or `any_of` several codes, optionally with
+`message_matches` (a regex on the flag's message). A quantity that is not
+written as a number (`TBD`) must come back as 0. The loader rejects a file
+whose codes are not in the rate card or whose rows are not in the document.
+`uv run python evals/make_eval_bids.py` regenerates the six eval bids.
+
+### Running the evals
+
+From `backend/`. Needs `GROQ_API_KEY`. The LLM cache is always off.
+
+```sh
+uv run python evals/run_evals.py                      # LLM_MODEL, the default plan (15 runs)
+uv run python evals/run_evals.py --model openai/gpt-oss-20b
+uv run python evals/run_evals.py --dry-run            # print the plan and the token estimate only
+uv run python evals/run_evals.py --cases messy_bid tricky_bid
+uv run python evals/run_evals.py --resume <run_id>    # make the runs a stopped eval is missing
+uv run python evals/run_evals.py --rescore <run_id>   # recompute scores and report, no LLM calls
+uv run python evals/run_evals.py --compare            # only rewrite the model comparison
+```
+
+**The default plan** fits one day of Groq's free tier (200,000 tokens per
+model per day): every case runs once, which gives the accuracy metrics, and
+three cases (`clean_bid`, `messy_bid`, `tricky_bid`) run three times in all,
+which gives stability. That is 15 runs, about 120,000 tokens. Change it with
+`--runs` (runs of every case), `--stability-runs` and `--stability-cases`.
+
+**Token budget.** Before anything is sent, the runner prints the estimated
+token use: for each run still to make, the mean of that case's earlier runs
+(from `results/raw/`), or 9,000 for a case never run. If the estimate is over
+`--max-tokens` (default 150,000, per model), nothing is run and the exit
+status is 1. While running it also stops once the tokens used reach the
+budget. Run one model per day's quota; two `--model`s in one command are
+checked against the budget separately.
+
+**Files.** A run id is `<timestamp>-<model>`. In `evals/results/`:
+
+| File | |
+| --- | --- |
+| `raw/<run_id>.json` | The raw pipeline output of every run: the extracted lines, the chosen production rate codes, the flags with their messages, the totals, the tokens and the time. Written after each run. No scores. |
+| `<run_id>.json` | The scores, computed from the raw file. What `GET /evals/latest` serves. |
+| `<run_id>.md` | The same as a readable report. |
+| `<timestamp>-comparison.md` | The models side by side, when more than one result is involved. |
+
+**Rescoring.** `--rescore <run_id>` (several ids, or `all`) recomputes every
+metric and the report from `raw/<run_id>.json` against the expected files as
+they are now. It makes no LLM call. Use it after checking an expected file by
+hand and marking it `VERIFIED BY HAND: yes`, or after correcting one.
+
+**Rate limits.** Cases run one after the other. On the free tier most runs
+wait on the tokens-per-minute limit: the client backs off, and if it gives up
+the runner waits 60, 120 and 240 seconds and tries the run again. A
+connection error or a server error is retried in the same way (after 15, 60
+and 180 seconds) and is never scored: it says nothing about the model. If a
+limit does not clear (the daily token limit) or the provider stays
+unreachable, the eval stops, scores what it has and marks it **incomplete**.
+`--resume <run_id>` then makes only the runs that are missing, with the
+model and plan the eval was started with. Runs go round by round (run 1 of
+every case, then the further runs of the stability cases), so a stopped eval
+still covers every case.
+
+### What each metric means
+
+Per bid and overall. Rates are counts added up over runs and cases
+(`51/54`), not averages of percentages. The accuracy metrics and the money
+figures use the first `--runs` runs of each case (one, by default), so the
+cases that are run three times for stability do not count three times.
+Stability, cost, speed and the list of failures use every run.
+
+| Metric | Meaning |
+| --- | --- |
+| Line recall | Share of the expected bid lines that came back, matched by item number (ignoring case and spacing). An item number written twice pairs in order of appearance. |
+| Line precision | Share of the lines that came back that were expected. A continuation row or a total priced as a line lowers it. |
+| Quantity exact match | Of the matched lines, the share whose quantity equals the expected one exactly (`1240` = `1,240`). A `TBD` must come back as 0. |
+| Unit match | Of the matched lines, the share with the expected unit after normalisation (`linear feet` = `LF`). |
+| Rows correctly skipped | Share of the must-skip rows (headers, titles, totals, continuation rows) that no bid line cites as its source. |
+| Production rate code accuracy | Of the matched lines, the share whose production rate code is the expected one (`none` counts as a code). |
+| Picked "none" although a rate existed | Of the matched lines that have a standard rate, how often the model used none. |
+| Picked a rate although none exists | Of the matched lines with no standard rate, how often the model chose one anyway. |
+| Flag recall | Share of the required flags that were raised: did every planted problem get caught? A flag counts if any extracted line with that item number carries it. A required flag on a line that was not extracted is a miss. |
+| Extra flags per bid | Flags that the expected answers neither require nor allow, per run: the noise. `HIGH_IMPACT_LINE` is never counted, because it follows from the totals. |
+| Grand total error | `abs(draft total - gold total) / gold total`. The gold total is computed by the pricing engine from the expected answers (`gold_estimate` in `evals/scoring.py`), never by hand. Lines whose expected rate is `none`, whose unit does not fit the rate, or that have no quantity add 0 to it. |
+| Total error, standard-rate lines only | The same, with every line the draft priced on a rate assumed by the LLM left out. The gold total prices lines without a standard rate at 0, so any dollars the LLM guesses for them show up in the grand total error; this second number separates that from real extraction and mapping errors. |
+| Stability | The stability cases run N times (default 3) uncached. Reported: of the cases run more than once, the number whose production rate codes were identical in every run, and the same for the grand total. Per case, "agreement" is the share of runs that gave the most common answer (2 of 3 = 67%). |
+| Latency | Wall-clock seconds per bid, and the same without the time spent waiting on rate limits. |
+| Tokens | Prompt and completion tokens per bid, as reported by Groq. "not reported" if the provider sends no usage. |
+
+A run in which the model's output could not be used at all (invalid JSON
+twice, or a request the provider rejects) counts as a run with no lines: it
+scores 0 on every metric and is listed as one failure, with the error.
+
+### The report
+
+Failures are listed as they are: for each one the report gives what was
+expected, what came back in each run, and in how many runs it happened. One
+kind is a note rather than an error: when the only difference from the gold
+total is dollars the LLM guessed on a line with no standard rate, the line is
+doing what the pipeline is designed to do (price it and flag it), and the
+report says so.
+
+"Known weaknesses" is generated from those failures, grouped by kind and by
+planted problem, most frequent first. Nothing in it is written by hand: an
+eval with no failures has an empty list.
+
+The metric functions are in `evals/metrics.py` and are unit-tested with small
+hand-made examples in `tests/test_eval_metrics.py`;
+`tests/test_evals_harness.py` runs the harness end to end with a fake LLM.
+Neither calls the API.
+
 ## Layout
 
 ```
 backend/
   app/
-    main.py                 FastAPI app: draft, reprice, export, rate card, samples
+    main.py                 FastAPI app: draft, reprice, export, rate card, samples, evals
+    eval_results.py         reads evals/results/ for GET /evals/latest
     export.py               the .xlsx export
     samples.py              the sample bids offered by the API
     config.py               settings from environment / .env
@@ -384,14 +557,25 @@ backend/
     draft_estimate.py       CLI
     consistency_check.py    runs the pipeline repeatedly and compares the results
     make_sample_bids.py     regenerates data/bids/
+  evals/
+    run_evals.py            the eval runner (CLI)
+    cases/                  one expected-answer YAML per case; bids/ holds the six eval bids
+    cases.py                loads and checks the expected files
+    metrics.py              the metric functions (pure)
+    scoring.py              scores a run, adds runs up, gold total, known weaknesses
+    results.py              the result file: build, save, load
+    report.py               markdown report and model comparison
+    make_eval_bids.py       regenerates cases/bids/
+    results/                <run_id>.json and .md (scores); raw/<run_id>.json (run outputs)
   tests/
 frontend/
-  app/                      layout (fonts), globals.css (design tokens), the page
+  app/                      layout (fonts), globals.css (design tokens), the page, evals/
   components/               hand-off, pipeline, rate card dialog, brand pieces
+  components/evals/         the Evals page: headline, model comparison, case table, failures
   components/review/        summary header, review first, table, side panel, totals, audit log
   components/ui/            shadcn/ui components
-  lib/                      api client, types, formatting, review logic, session state
-  tests/                    Vitest: summary header and approve gating
+  lib/                      api client, types, formatting, review logic, session state, eval types
+  tests/                    Vitest: summary header, approve gating, the Evals page
 ```
 
 ## Running
@@ -412,7 +596,7 @@ From `frontend/`:
 ```sh
 npm install
 npm run dev          # http://localhost:3000
-npm test             # Vitest: summary header, approve gating, review logic
+npm test             # Vitest: summary header, approve gating, review logic, Evals page
 npm run lint
 npm run typecheck
 npm run build        # production build
@@ -437,6 +621,14 @@ from the cache.
 
 The sample bids are synthetic. Regenerate them with
 `uv run python scripts/make_sample_bids.py`.
+
+### Evals
+
+```sh
+uv run python evals/run_evals.py                      # 9 cases, 15 uncached runs
+```
+
+See [Evals](#evals) for the options, the dataset and what each metric means.
 
 ### Determinism check
 
@@ -467,6 +659,7 @@ and can still vary between runs, which is one more reason they are flagged.
 | `POST /estimates/draft/sample/{id}` | the same, for a sample bid |
 | `POST /estimates/reprice` | apply reviewer edits and price again. No LLM. |
 | `POST /estimates/export` | the reviewed estimate as `.xlsx` |
+| `GET /evals/latest` | the newest eval result of each model (`{"results": [...]}`, newest first), read from `evals/results/`. 404 if no eval has been run. |
 
 ```sh
 curl -F "file=@data/bids/clean_bid.xlsx" http://127.0.0.1:8010/estimates/draft

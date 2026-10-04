@@ -8,7 +8,12 @@ import httpx
 import pytest
 from pydantic import BaseModel, Field
 
-from app.llm import LLMConfigError, LLMRateLimitError, LLMResponseError
+from app.llm import (
+    LLMConfigError,
+    LLMRateLimitError,
+    LLMResponseError,
+    LLMUnavailableError,
+)
 from app.llm.cache import ResponseCache
 from app.llm.groq_client import GroqLLMClient
 from app.llm.schema import strict_json_schema
@@ -229,6 +234,52 @@ def test_rate_limit_gives_up_after_four_attempts():
         client.structured("How many?", Item)
     assert len(mock.requests) == 4
     assert sleeps == [2.0, 4.0, 8.0]
+
+
+def test_a_connection_error_is_reported_as_the_provider_being_unavailable():
+    request = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
+    client, _mock = make_client([groq.APIConnectionError(request=request)])
+
+    with pytest.raises(LLMUnavailableError, match="could not be reached"):
+        client.structured("How many?", Item)
+
+
+def test_usage_adds_up_calls_tokens_and_rate_limit_waits(tmp_path):
+    class MockGroqWithUsage(MockGroq):
+        def _create(self, **request):
+            response = super()._create(**request)
+            response.usage = SimpleNamespace(
+                prompt_tokens=100, completion_tokens=20, total_tokens=120
+            )
+            return response
+
+    mock = MockGroqWithUsage([rate_limit_error(), GOOD, GOOD])
+    client = GroqLLMClient(
+        api_key=None,
+        model="test-model",
+        cache=ResponseCache(tmp_path),
+        client=mock,
+        sleep=lambda _seconds: None,
+    )
+
+    client.structured("How many?", Item)
+    client.structured("How many more?", Item)
+    client.structured("How many?", Item)  # served from the cache: not counted
+
+    usage = client.usage
+    assert usage.calls == 2
+    assert (usage.prompt_tokens, usage.completion_tokens, usage.total_tokens) == (200, 40, 240)
+    assert usage.rate_limit_waits == 1
+    assert usage.rate_limit_wait_seconds == 2.0
+
+
+def test_usage_stays_zero_when_the_provider_reports_none():
+    client, _mock = make_client([GOOD])
+
+    client.structured("How many?", Item)
+
+    assert client.usage.calls == 1
+    assert client.usage.total_tokens == 0
 
 
 def test_missing_api_key_raises_a_clear_error():
