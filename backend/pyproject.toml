@@ -1,0 +1,20 @@
+[project]
+name = "bid-draft-agent-backend"
+version = "0.1.0"
+description = "Bid Draft Agent backend: schemas, deterministic pricing engine, API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

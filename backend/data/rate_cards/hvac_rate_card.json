@@ -1,0 +1,41 @@
+{
+  "company_name": "Northline Mechanical",
+  "trade": "HVAC",
+  "currency": "USD",
+  "labor_rates": [
+    { "code": "LAB-TECH", "role": "HVAC Technician", "hourly_rate": "85.00" },
+    { "code": "LAB-APPR", "role": "Apprentice", "hourly_rate": "48.00" },
+    { "code": "LAB-SHMT", "role": "Sheet Metal Worker", "hourly_rate": "78.00" },
+    { "code": "LAB-ELEC", "role": "Electrician", "hourly_rate": "92.00" },
+    { "code": "LAB-SUPV", "role": "Project Supervisor", "hourly_rate": "110.00" }
+  ],
+  "materials": [
+    { "code": "MAT-DUCT-GALV", "name": "Galvanized sheet metal ductwork, fabricated", "unit": "LB", "unit_cost": "4.85" },
+    { "code": "MAT-DUCT-SPIRAL-12", "name": "Spiral round duct, 12 in", "unit": "LF", "unit_cost": "11.50" },
+    { "code": "MAT-DUCT-FLEX-8", "name": "Insulated flexible duct, 8 in", "unit": "LF", "unit_cost": "3.40" },
+    { "code": "MAT-INSUL-WRAP", "name": "Duct wrap insulation, R-6 foil-faced", "unit": "SF", "unit_cost": "1.15" },
+    { "code": "MAT-CU-3T", "name": "Condensing unit, 3 ton", "unit": "EA", "unit_cost": "2450.00" },
+    { "code": "MAT-CU-5T", "name": "Condensing unit, 5 ton", "unit": "EA", "unit_cost": "3850.00" },
+    { "code": "MAT-AHU-3T", "name": "Air handler, 3 ton", "unit": "EA", "unit_cost": "1650.00" },
+    { "code": "MAT-AHU-5T", "name": "Air handler, 5 ton", "unit": "EA", "unit_cost": "2380.00" },
+    { "code": "MAT-RTU-10T", "name": "Packaged rooftop unit, 10 ton", "unit": "EA", "unit_cost": "14500.00" },
+    { "code": "MAT-LINESET-50", "name": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated", "unit": "EA", "unit_cost": "325.00" },
+    { "code": "MAT-REFRIG-454B", "name": "Refrigerant R-454B", "unit": "LB", "unit_cost": "28.00" },
+    { "code": "MAT-TSTAT-PROG", "name": "Programmable thermostat", "unit": "EA", "unit_cost": "145.00" },
+    { "code": "MAT-REG-SUP", "name": "Supply register, 10 x 6", "unit": "EA", "unit_cost": "18.50" },
+    { "code": "MAT-GRILLE-RET", "name": "Return air grille, 20 x 20", "unit": "EA", "unit_cost": "42.00" },
+    { "code": "MAT-DAMPER-VCD-12", "name": "Volume control damper, 12 in", "unit": "EA", "unit_cost": "68.00" }
+  ],
+  "equipment": [
+    { "code": "EQ-LIFT-19", "name": "Scissor lift, 19 ft", "unit": "day", "rate": "185.00" },
+    { "code": "EQ-CRANE-40T", "name": "Crane rental, 40 ton, with operator", "unit": "hour", "rate": "245.00" },
+    { "code": "EQ-VACPUMP", "name": "Vacuum pump", "unit": "day", "rate": "65.00" },
+    { "code": "EQ-RECOVERY", "name": "Refrigerant recovery machine", "unit": "day", "rate": "85.00" }
+  ],
+  "markups": {
+    "material_markup_pct": "15",
+    "overhead_pct": "10",
+    "profit_pct": "8",
+    "sales_tax_pct_on_materials": "7.25"
+  }
+}
