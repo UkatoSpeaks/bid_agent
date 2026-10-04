@@ -283,16 +283,75 @@ def test_grand_total_is_the_sum_of_the_reported_figures(rate_card):
     assert totals.subtotal + totals.overhead + totals.profit == totals.grand_total
 
 
+def test_subtotal_is_the_sum_of_the_displayed_categories(rate_card):
+    # 6 x 1 EA x $0.125 = 0.75 direct material
+    #   markup   = 0.75 x 10%            = 0.075   -> 0.08
+    #   tax      = (0.75 + 0.075) x 8%   = 0.066   -> 0.07
+    #   subtotal = 0.75 + 0.08 + 0.07    = 0.90
+    #     (carried unrounded it would be 0.75 + 0.075 + 0.066 = 0.891 -> 0.89,
+    #      a cent less than the three figures displayed above it)
+    #   overhead = 0.90 x 10%            = 0.09
+    #   profit   = (0.90 + 0.09) x 10%   = 0.099   -> 0.10
+    #   grand total = 0.90 + 0.09 + 0.10 = 1.09
+    line = make_line("1", "6", [("material", "M-SCREW", "1")])
+
+    totals = price_estimate([line], rate_card).totals
+
+    assert totals.direct_material == D("0.75")
+    assert totals.material_markup == D("0.08")
+    assert totals.sales_tax == D("0.07")
+    assert totals.subtotal == D("0.90")
+    assert totals.overhead == D("0.09")
+    assert totals.profit == D("0.10")
+    assert totals.grand_total == D("1.09")
+    assert_foots(price_estimate([line], rate_card))
+
+
+def assert_foots(estimate):
+    """Every displayed figure is the exact sum of the figures above it."""
+    totals = estimate.totals
+    for line in estimate.lines:
+        assert line.labor_cost + line.material_cost + line.equipment_cost == line.line_subtotal
+    assert sum((line.labor_cost for line in estimate.lines), D("0")) == totals.direct_labor
+    assert sum((line.material_cost for line in estimate.lines), D("0")) == totals.direct_material
+    assert sum((line.equipment_cost for line in estimate.lines), D("0")) == totals.direct_equipment
+    assert (
+        totals.direct_labor
+        + totals.direct_material
+        + totals.material_markup
+        + totals.sales_tax
+        + totals.direct_equipment
+        == totals.subtotal
+    )
+    assert totals.subtotal + totals.overhead + totals.profit == totals.grand_total
+    # Nothing is displayed with more than 2 decimals.
+    for amount in totals.model_dump().values():
+        assert amount == amount.quantize(D("0.01"))
+
+
+def test_every_displayed_figure_foots(rate_card):
+    # Awkward quantities, so most intermediate values have more than 2
+    # decimals. Whatever they round to, each displayed sum must be exactly
+    # the sum of the displayed figures above it.
+    for quantity in ("1", "3", "6", "7", "13", "0.333", "17.77", "1850.5"):
+        lines = [
+            make_line("A", quantity, [("labor", "L-TECH", "0.18"), ("material", "M-SCREW", "1")]),
+            make_line("B", quantity, [("material", "M-DUCT", "1.1"), ("equipment", "E-LIFT", "0.07")]),
+            make_line("C", "3", [("labor", "L-APPR", "0.333"), ("material", "M-SCREW", "7")]),
+        ]
+
+        assert_foots(price_estimate(lines, rate_card))
+
+
 def test_profit_is_calculated_from_unrounded_overhead(rate_card):
     # 3 x 1 EA x $0.125 = 0.375 -> 0.38 direct material (rounded at line level)
-    #   markup   = 0.38 x 10%              = 0.038
-    #   tax      = (0.38 + 0.038) x 8%     = 0.03344
-    #   subtotal = 0.38 + 0.038 + 0.03344  = 0.45144    -> 0.45
-    #   overhead = 0.45144 x 10%           = 0.045144   -> 0.05
-    #   profit   = (0.45144 + 0.045144) x 10%
-    #            = 0.0496584                            -> 0.05
-    #     (from the rounded figures it would be (0.45 + 0.05) x 10% = 0.05
-    #      here too, but the inputs to each step stay unrounded)
+    #   markup   = 0.38 x 10%              = 0.038     -> 0.04
+    #   tax      = (0.38 + 0.038) x 8%     = 0.03344   -> 0.03
+    #   subtotal = 0.38 + 0.04 + 0.03      = 0.45
+    #   overhead = 0.45 x 10%              = 0.045     -> 0.05
+    #   profit   = (0.45 + 0.045) x 10%    = 0.0495    -> 0.05
+    #     (from the rounded overhead it would be (0.45 + 0.05) x 10% = 0.05
+    #      here too, but the input to each percentage stays unrounded)
     #   grand total = 0.45 + 0.05 + 0.05 = 0.55
     line = make_line("1", "3", [("material", "M-SCREW", "1")])
 

@@ -1,5 +1,6 @@
 """Application settings, read from environment variables and .env."""
 
+from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
     app_name: str = "Bid Draft Agent"
     app_env: str = "development"
     rate_card_path: Path = Path("data/rate_cards/hvac_rate_card.json")
+    # A line above this share of the subtotal (percent) is flagged
+    # HIGH_IMPACT_LINE, and blocked if it rests on an assumed production rate.
+    high_impact_line_pct: Decimal = Decimal("15")
 
     # LLM (extraction and classification only; it never prices anything).
     groq_api_key: str | None = None

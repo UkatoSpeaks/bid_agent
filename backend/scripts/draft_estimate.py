@@ -3,9 +3,9 @@
     uv run python scripts/draft_estimate.py data/bids/clean_bid.xlsx
     uv run python scripts/draft_estimate.py data/bids/clean_bid.xlsx --json
 
-Parses the document, extracts the lines (LLM), maps them to the rate card
-(LLM), prices them (pricing engine) and prints the estimate with its flags
-and calculation traces.
+Parses the document, extracts the lines (LLM), maps each to a company
+production rate (LLM), prices them (pricing engine), reviews them by dollar
+impact and prints the estimate with its flags and calculation traces.
 """
 
 import argparse
@@ -26,6 +26,11 @@ from app.schemas import RateCard  # noqa: E402
 
 WIDTH = 100
 SEVERITY_ORDER = {"blocker": 0, "warning": 1, "info": 2}
+RATE_BASIS = {
+    "standard": "company standard",
+    "assumed": "ASSUMED by the LLM",
+    "none": "not priced",
+}
 
 
 def main() -> int:
@@ -43,7 +48,9 @@ def main() -> int:
     settings = get_settings()
     try:
         rate_card = load_rate_card(args.rate_card or settings.resolved_rate_card_path)
-        result = draft_estimate(args.path, rate_card, get_llm_client(settings))
+        result = draft_estimate(
+            args.path, rate_card, get_llm_client(settings), settings.high_impact_line_pct
+        )
     except (FileNotFoundError, DocumentParseError, LLMError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -74,6 +81,12 @@ def print_estimate(result: DraftResult, rate_card: RateCard) -> None:
             f"    Source: {line.source_ref or '-'}"
             f"    Line subtotal: {_money(line.line_subtotal, currency)}"
         )
+        share = (
+            f"{line.subtotal_share_pct}% of subtotal"
+            if line.subtotal_share_pct is not None
+            else "share of subtotal n/a"
+        )
+        print(f"    Rates: {RATE_BASIS[line.rate_basis]}    {share}")
         if line.assumptions:
             print("    Assumptions:")
             for assumption in line.assumptions:
@@ -90,15 +103,13 @@ def print_estimate(result: DraftResult, rate_card: RateCard) -> None:
                     subsequent="        ",
                 )
 
-    if result.skipped:
+    if estimate.skipped_rows:
         print()
         print("-" * WIDTH)
         print("ROWS NOT TREATED AS BID ITEMS")
-        for skipped in result.skipped:
-            line = skipped.line
+        for row in estimate.skipped_rows:
             _wrapped(
-                f"[{line.source_ref}] {line.item_number} {line.description} "
-                f"(qty '{line.quantity}'): {skipped.reason}",
+                f"[{row.source_ref}] {row.description}: {row.reason}",
                 indent="  ",
                 subsequent="    ",
             )
@@ -125,22 +136,34 @@ def print_estimate(result: DraftResult, rate_card: RateCard) -> None:
     for label, amount in rows:
         print(f"  {label:<36}{_money(amount, currency):>16}")
 
+    review = estimate.review
     print()
     print("-" * WIDTH)
-    counts = {severity: 0 for severity in SEVERITY_ORDER}
-    for flag in estimate.all_flags:
-        counts[flag.severity] += 1
+    print("REVIEW SUMMARY")
     print(
-        f"FLAGS: {counts['blocker']} blocker(s), {counts['warning']} warning(s), "
-        f"{counts['info']} info"
+        f"  Based on company standard production rates: {review.standard_rate_pct}% "
+        f"of the subtotal ({review.lines_on_standard_rates} line(s))"
+    )
+    print(
+        f"  Resting on production rates assumed by the LLM: {review.assumed_rate_pct}% "
+        f"of the subtotal ({review.lines_on_assumed_rates} line(s))"
+    )
+    print(f"  Lines not priced: {review.lines_not_priced}")
+    print(
+        f"  High-impact lines (above {_number(review.high_impact_threshold_pct)}% of the "
+        f"subtotal): {', '.join(review.high_impact_line_ids) or 'none'}"
+    )
+    print(
+        f"  Flags: {review.blocker_count} blocker(s), {review.warning_count} warning(s), "
+        f"{review.info_count} info"
     )
     for flag in sorted(estimate.all_flags, key=lambda f: SEVERITY_ORDER[f.severity]):
         if flag.severity == "info":
             continue
-        print(f"  [{flag.severity.upper()}] {flag.line_id} {flag.code}")
-    if counts["blocker"]:
+        print(f"    [{flag.severity.upper()}] {flag.line_id} {flag.code}")
+    if review.blocker_count:
         print()
-        print("  This draft has blockers: the grand total is incomplete until they are resolved.")
+        print("  This draft has blockers: do not rely on the grand total until they are resolved.")
 
 
 def _wrapped(text: str, indent: str, subsequent: str) -> None:

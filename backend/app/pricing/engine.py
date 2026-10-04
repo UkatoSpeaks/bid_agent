@@ -16,42 +16,44 @@ equipment costs. These are direct costs; nothing is marked up at line level.
 Across the estimate:
 
     1. direct_labor / direct_material / direct_equipment = sum of line costs
-    2. material_markup = direct_material x material_markup_pct
-    3. sales_tax       = (direct_material + material_markup)
-                         x sales_tax_pct_on_materials
+    2. material_markup = round(direct_material x material_markup_pct)
+    3. sales_tax       = round((direct_material + material_markup)
+                               x sales_tax_pct_on_materials)
        (tax is charged on the marked-up material price)
     4. subtotal        = direct_labor
                          + direct_material + material_markup + sales_tax
                          + direct_equipment
     5. overhead        = round(subtotal x overhead_pct)
     6. profit          = round((subtotal + overhead) x profit_pct)
-    7. grand_total     = round(subtotal) + overhead + profit
+    7. grand_total     = subtotal + overhead + profit
 
 Labor and equipment carry no markup or tax of their own; they only pick up
 overhead and profit.
 
 Rounding
 --------
-Money is rounded to 2 decimals with ROUND_HALF_UP (0.125 -> 0.13), in three
-places:
+Money is rounded to 2 decimals with ROUND_HALF_UP (0.125 -> 0.13). Every
+displayed figure is rounded before it is added to another, so every displayed
+sum foots to the cent:
 
     * Line level: a line's labor, material and equipment costs are each
       rounded once, after summing that line's unrounded component costs.
       line_subtotal is the sum of those three rounded figures, and the direct
       totals are sums of the rounded line costs, so lines always add up to
       the direct totals exactly.
-    * Markup, tax and subtotal are computed in a chain at full Decimal
-      precision, and each is rounded once when it is reported. Overhead and
-      profit are calculated from the unrounded subtotal (and unrounded
-      overhead), so half-cent errors do not compound through the chain.
+    * Markup and tax are each rounded once, and subtotal is the sum of the
+      five displayed categories: direct labor + direct material + material
+      markup + sales tax + direct equipment.
     * Overhead and profit are each rounded once, and grand_total is the sum
-      of the three reported figures: subtotal + overhead + profit. The bottom
-      of the estimate therefore always adds up exactly as displayed.
+      of the three displayed figures: subtotal + overhead + profit.
 
-The trade-off is that grand_total can differ by a cent from the full
-precision chain. One cent of drift can also remain higher up: the reported
-subtotal may differ by a cent from re-adding the reported direct costs,
-markup and tax, because those are rounded independently of it.
+Within a percentage chain the input to the next step stays unrounded: tax is
+calculated on direct material plus the unrounded markup, and profit on
+subtotal plus the unrounded overhead, so half-cent errors do not compound.
+
+The trade-off is that subtotal and grand_total can each differ by a cent from
+a calculation carried at full precision from end to end. Adding up exactly as
+displayed is worth more to a reviewer than that cent.
 """
 
 from decimal import ROUND_HALF_UP, Decimal
@@ -65,6 +67,7 @@ from app.schemas import (
     Flag,
     LineFlag,
     PricedLine,
+    RateBasis,
     RateCard,
 )
 
@@ -110,8 +113,9 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
     direct_material = sum((p.material_cost for p in priced), ZERO)
     direct_equipment = sum((p.equipment_cost for p in priced), ZERO)
 
-    # Full precision through the subtotal; each figure is rounded only when
-    # reported.
+    # Each displayed figure is rounded before it is summed, so the subtotal
+    # is exactly the five categories above it and the grand total is exactly
+    # subtotal + overhead + profit.
     markups = rate_card.markups
     material_markup = direct_material * markups.material_markup_pct / HUNDRED
     sales_tax = (
@@ -119,17 +123,16 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
         * markups.sales_tax_pct_on_materials
         / HUNDRED
     )
+    reported_markup = round_money(material_markup)
+    reported_tax = round_money(sales_tax)
     subtotal = (
-        direct_labor + direct_material + material_markup + sales_tax + direct_equipment
+        direct_labor + direct_material + reported_markup + reported_tax + direct_equipment
     )
     overhead = subtotal * markups.overhead_pct / HUNDRED
     profit = (subtotal + overhead) * markups.profit_pct / HUNDRED
-    # Overhead and profit are rounded before summing so that the reported
-    # subtotal + overhead + profit equals the reported grand total exactly.
-    reported_subtotal = round_money(subtotal)
     reported_overhead = round_money(overhead)
     reported_profit = round_money(profit)
-    grand_total = reported_subtotal + reported_overhead + reported_profit
+    grand_total = subtotal + reported_overhead + reported_profit
 
     return Estimate(
         currency=currency,
@@ -137,10 +140,10 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
         totals=EstimateTotals(
             direct_labor=direct_labor,
             direct_material=direct_material,
-            material_markup=round_money(material_markup),
-            sales_tax=round_money(sales_tax),
+            material_markup=reported_markup,
+            sales_tax=reported_tax,
             direct_equipment=direct_equipment,
-            subtotal=reported_subtotal,
+            subtotal=subtotal,
             overhead=reported_overhead,
             profit=reported_profit,
             grand_total=grand_total,
@@ -264,7 +267,16 @@ def _price_line(line: BidLineItem, index: _RateIndex, currency: str) -> PricedLi
         flags=flags,
         source_ref=line.source_ref,
         assumptions=list(line.assumptions),
+        rate_basis=_rate_basis(line),
+        production_rate_code=line.production_rate_code,
     )
+
+
+def _rate_basis(line: BidLineItem) -> RateBasis:
+    """Whose quantities per unit the line's components carry."""
+    if not line.components:
+        return "none"
+    return "standard" if line.production_rate_code else "assumed"
 
 
 # Trace formatting. Display only: nothing below feeds back into a calculation.

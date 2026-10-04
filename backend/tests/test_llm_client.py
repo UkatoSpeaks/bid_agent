@@ -153,6 +153,26 @@ def test_cache_key_depends_on_prompt_schema_and_model(tmp_path):
     assert len(list((tmp_path / "llm").glob("*.json"))) == 4
 
 
+def test_cache_key_depends_on_temperature_and_reasoning_effort(tmp_path):
+    cache = ResponseCache(tmp_path / "llm")
+
+    def ask(**settings):
+        mock = MockGroq([GOOD])
+        client = GroqLLMClient(
+            api_key=None, model="test-model", cache=cache, client=mock, **settings
+        )
+        client.structured("How many?", Item)
+        return len(mock.requests)
+
+    assert ask() == 1  # temperature 0.2, reasoning effort "medium"
+    assert ask() == 0  # same settings: served from the cache
+    assert ask(temperature=0.0) == 1
+    assert ask(reasoning_effort="high") == 1
+    assert ask(reasoning_effort=None) == 1
+    assert ask(temperature=0.0) == 0
+    assert len(list((tmp_path / "llm").glob("*.json"))) == 4
+
+
 def test_retried_response_is_cached_under_the_original_prompt(tmp_path):
     cache = ResponseCache(tmp_path / "llm")
     bad = {"name": "duct", "count": -1, "note": None}

@@ -5,13 +5,14 @@ from decimal import Decimal as D
 import pytest
 
 from app.extraction import ExtractedLines, extract_line_items
-from app.extraction.extract import parse_quantity, quantity_in_source
+from app.extraction.extract import parse_quantity, quantity_in_source, vague_phrases
 from app.parsing import parse_bid_document
 
 from tests.conftest import BIDS_DIR, FakeLLMClient
 
 
-def extracted(item_number, description, quantity, unit, source_ref, notes=None):
+def extracted(item_number, description, quantity, unit, source_ref, notes=None,
+              scope_clarity="clear", scope_reason=None):  # fmt: skip
     return {
         "item_number": item_number,
         "description": description,
@@ -19,6 +20,8 @@ def extracted(item_number, description, quantity, unit, source_ref, notes=None):
         "unit": unit,
         "source_ref": source_ref,
         "notes": notes,
+        "scope_clarity": scope_clarity,
+        "scope_reason": scope_reason,
     }
 
 
@@ -120,19 +123,110 @@ def test_notes_become_info_flags():
         "messy_bid.pdf",
         [
             extracted(
-                "B5",
-                "Misc. ductwork modifications as required",
-                "1",
-                "LS",
-                "p1-t1-r13",
-                notes="Scope is vague: 'as required' is not quantified.",
+                "A4",
+                "Refrigerant line sets, 50 ft",
+                "2",
+                "ea.",
+                "p1-t1-r6",
+                notes="Pipe sizes are not stated.",
             )
         ],
     )
 
     line = result.lines[0]
     assert codes(line) == [("info", "EXTRACTION_NOTE")]
-    assert line.flags[0].message == "Scope is vague: 'as required' is not quantified."
+    assert line.flags[0].message == "Pipe sizes are not stated."
+
+
+def test_scope_marked_vague_by_the_llm_gets_a_warning():
+    # No trigger phrase in the description: the flag rests on the LLM alone.
+    result, _ = run_extraction(
+        "messy_bid.pdf",
+        [
+            extracted(
+                "B4",
+                "Supply registers",
+                "64",
+                "Each",
+                "p1-t1-r12",
+                scope_clarity="vague",
+                scope_reason="No size or type of register is given.",
+            )
+        ],
+    )
+
+    line = result.lines[0]
+    assert codes(line) == [("warning", "VAGUE_SCOPE")]
+    assert line.flags[0].message.startswith("No size or type of register is given.")
+
+
+def test_vague_phrase_is_caught_in_code_when_the_llm_misses_it():
+    # The fake LLM says "clear"; the phrase check does not depend on it.
+    result, _ = run_extraction(
+        "messy_bid.pdf",
+        [extracted("B5", "Misc. ductwork modifications as required", "1", "LS", "p1-t1-r13")],
+    )
+
+    line = result.lines[0]
+    assert codes(line) == [("warning", "VAGUE_SCOPE")]
+    assert "Description contains 'as required', 'misc.'." in line.flags[0].message
+
+
+def test_vague_scope_is_flagged_once_when_llm_and_code_agree():
+    result, _ = run_extraction(
+        "messy_bid.pdf",
+        [
+            extracted(
+                "B5",
+                "Misc. ductwork modifications as required",
+                "1",
+                "LS",
+                "p1-t1-r13",
+                scope_clarity="vague",
+                scope_reason="'as required' leaves the amount of work open.",
+            )
+        ],
+    )
+
+    line = result.lines[0]
+    assert codes(line) == [("warning", "VAGUE_SCOPE")]
+    message = line.flags[0].message
+    assert "'as required' leaves the amount of work open." in message
+    assert "Description contains 'as required', 'misc.'." in message
+
+
+def test_clear_scope_gets_no_flag_and_the_prompt_asks_for_scope_clarity():
+    result, llm = run_extraction(
+        "clean_bid.xlsx",
+        [extracted("9", "Supply register, 10 x 6", "48", "EA", "Bid Schedule!R10")],
+    )
+
+    assert result.lines[0].flags == []
+    _schema, prompt = llm.calls[0]
+    assert "scope_clarity" in prompt and '"as required"' in prompt
+
+
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [
+        ("Misc. ductwork modifications as required", ["as required", "misc."]),
+        ("MISCELLANEOUS supports", ["misc."]),
+        ("Controls allowance", ["allowance"]),
+        ("Ductwork per plans and specs", ["per plans"]),
+        ("Install per the specifications", ["per specifications"]),
+        ("Hangers, supports, etc.", ["etc."]),
+        ("Balancing as needed", ["as needed"]),
+        ("Refrigerant charge, amount TBD", ["TBD"]),
+        ("Demolition, extent to be determined", ["TBD"]),
+        # No false positives on ordinary descriptions.
+        ("Spiral duct, 12 in round", []),
+        ("Required fire dampers", []),
+        ("Permission slab, 3 per unit", []),
+        ("Transmission ductwork", []),
+    ],
+)
+def test_vague_phrases(description, expected):
+    assert vague_phrases(description) == expected
 
 
 def test_header_and_subtotal_rows_returned_by_the_llm_are_not_priced():

@@ -7,6 +7,7 @@ nothing is computed here.
 
 import re
 from decimal import Decimal, InvalidOperation
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -32,6 +33,15 @@ class ExtractedLine(BaseModel):
     )
     notes: str | None = Field(
         description="Anything ambiguous or unclear about this item, else null."
+    )
+    scope_clarity: Literal["clear", "vague"] = Field(
+        description=(
+            "'vague' if the description does not say what work or how much of it "
+            "is included, else 'clear'."
+        )
+    )
+    scope_reason: str | None = Field(
+        description="When scope_clarity is 'vague': one line saying why. Else null."
     )
 
 
@@ -59,7 +69,8 @@ Rules:
 - Never compute, estimate or infer a quantity. If no quantity is written for an item, use an empty string and explain in notes.
 - Skip rows that are not bid items: column headers, document titles, section titles, subtotal and total rows, and general notes.
 - source_ref must be the reference in [brackets] at the start of the row the item came from, copied exactly, without the brackets.
-- If anything about an item is ambiguous (vague scope, unclear unit, unreadable or missing value), describe it in notes. Do not guess. Use null for notes when nothing is ambiguous.
+- If anything else about an item is ambiguous (unclear unit, unreadable or missing value), describe it in notes. Do not guess. Use null for notes when nothing is ambiguous.
+- scope_clarity: mark every item "clear" or "vague". An item is "vague" when its description does not pin down what work, or how much of it, is included. Signals are phrases such as "as required", "as needed", "misc.", "allowance", "TBD", "per plans", "per specifications" and "etc.", and lump sums with no defined content. For a vague item, give the reason in scope_reason and quote the phrase. For a clear item, scope_reason is null.
 
 Document: {filename}
 Each row below starts with its reference in [brackets]. Table cells are separated by " | ".
@@ -95,6 +106,9 @@ def verify_extracted_lines(
         * QUANTITY_NOT_IN_SOURCE (blocker): the quantity is not written in the
           cited row, so it may be invented.
         * EXTRACTION_NOTE (info): the LLM's own note about an ambiguity.
+        * VAGUE_SCOPE (warning): the LLM marked the scope as vague, or the
+          description contains a phrase such as "as required" or "misc."
+          (checked in code, so it does not depend on the LLM noticing).
 
     Rows that are plainly headers or (sub)totals are dropped and reported in
     `skipped` instead of being priced.
@@ -154,6 +168,10 @@ def verify_extracted_lines(
                 Flag(severity="info", code="EXTRACTION_NOTE", message=line.notes.strip())
             )
 
+        vague = _vague_scope_flag(line)
+        if vague:
+            flags.append(vague)
+
         lines.append(
             BidLineItem(
                 id=f"L{len(lines) + 1:03d}",
@@ -212,6 +230,54 @@ def quantity_in_source(quantity_text: str, source_text: str) -> bool:
         if parse_quantity(match.group().rstrip(",")) == abs(quantity):
             return True
     return False
+
+
+# Phrases that leave the amount of work open. Matched as whole words, ignoring
+# case; label first, pattern second.
+_VAGUE_PHRASES: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
+    (label, re.compile(pattern, flags=re.IGNORECASE))
+    for label, pattern in (
+        ("as required", r"\bas\s+(?:may\s+be\s+)?required\b"),
+        ("as needed", r"\bas\s+needed\b"),
+        ("as necessary", r"\bas\s+necessary\b"),
+        ("as directed", r"\bas\s+directed\b"),
+        ("misc.", r"\bmisc(?:ellaneous)?\b"),
+        ("allowance", r"\ballowances?\b"),
+        ("TBD", r"\bt\.?b\.?d\b|\bto\s+be\s+determined\b"),
+        ("per plans", r"\bper\s+(?:the\s+)?(?:plans?|drawings?|dwgs?)\b"),
+        ("per specifications", r"\bper\s+(?:the\s+)?spec(?:s|ifications?)?\b"),
+        ("etc.", r"\betc\b"),
+    )
+)
+
+
+def vague_phrases(description: str) -> list[str]:
+    """The vague-scope phrases found in a description, e.g. ['misc.', 'as required']."""
+    return [label for label, pattern in _VAGUE_PHRASES if pattern.search(description)]
+
+
+def _vague_scope_flag(line: ExtractedLine) -> Flag | None:
+    """One VAGUE_SCOPE warning if the LLM or the phrase check says so."""
+    reasons: list[str] = []
+    if line.scope_clarity == "vague":
+        reason = (line.scope_reason or "").strip()
+        if reason and reason[-1] not in ".!?":
+            reason += "."
+        reasons.append(reason or "The LLM marked the scope as vague without a reason.")
+    phrases = vague_phrases(line.description)
+    if phrases:
+        quoted = ", ".join(f"'{phrase}'" for phrase in phrases)
+        reasons.append(f"Description contains {quoted}.")
+    if not reasons:
+        return None
+    return Flag(
+        severity="warning",
+        code="VAGUE_SCOPE",
+        message=(
+            " ".join(reasons)
+            + " Clarify the scope before relying on this line's price."
+        ),
+    )
 
 
 _HEADER_QUANTITIES = {"qty", "qty.", "quantity", "quantities"}

@@ -1,10 +1,13 @@
 """Pricing engine output."""
 
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from app.schemas.bid import Flag
+
+RateBasis = Literal["standard", "assumed", "none"]
 
 
 class PricedLine(BaseModel):
@@ -24,6 +27,14 @@ class PricedLine(BaseModel):
     flags: list[Flag]
     source_ref: str | None = None
     assumptions: list[str] = Field(default_factory=list)
+    # Where the quantities per unit behind the costs come from: "standard" (a
+    # company production rate, named in production_rate_code), "assumed"
+    # (proposed by the LLM) or "none" (the line has no components).
+    rate_basis: RateBasis = "none"
+    production_rate_code: str | None = None
+    # This line's share of the estimate subtotal, in percent. Set by
+    # review_estimate(); None before the review or when the subtotal is 0.
+    subtotal_share_pct: Decimal | None = None
 
 
 class EstimateTotals(BaseModel):
@@ -44,8 +55,38 @@ class LineFlag(Flag):
     line_id: str
 
 
+class ReviewSummary(BaseModel):
+    """What a reviewer needs before reading the lines. See pricing/review.py."""
+
+    blocker_count: int
+    warning_count: int
+    info_count: int
+    # Share of the subtotal (percent, 1 decimal) priced from company standard
+    # production rates, and the share resting on rates assumed by the LLM.
+    # They add up to 100, or are both 0 when nothing was priced.
+    standard_rate_pct: Decimal
+    assumed_rate_pct: Decimal
+    lines_on_standard_rates: int
+    lines_on_assumed_rates: int
+    lines_not_priced: int
+    high_impact_threshold_pct: Decimal
+    high_impact_line_ids: list[str]
+
+
+class SkippedRow(BaseModel):
+    """A row the LLM returned that code recognised as not being a bid item."""
+
+    source_ref: str
+    description: str
+    reason: str
+
+
 class Estimate(BaseModel):
     currency: str
     lines: list[PricedLine]
     totals: EstimateTotals
     all_flags: list[LineFlag]
+    # Both are filled in after pricing: review by review_estimate(),
+    # skipped_rows by the pipeline.
+    review: ReviewSummary | None = None
+    skipped_rows: list[SkippedRow] = Field(default_factory=list)

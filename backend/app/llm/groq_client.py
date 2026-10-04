@@ -65,7 +65,9 @@ class GroqLLMClient(LLMClient):
 
     def structured(self, prompt: str, schema: type[T]) -> T:
         json_schema = strict_json_schema(schema)
-        key = cache_key(self._model, prompt, json_schema)
+        key = cache_key(
+            self._model, prompt, json_schema, self._temperature, self._reasoning_effort
+        )
 
         if self._cache is not None:
             cached = self._cache.get(key)

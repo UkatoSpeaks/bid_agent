@@ -1,4 +1,8 @@
-"""On-disk cache of parsed LLM responses, keyed by model + prompt + schema."""
+"""On-disk cache of parsed LLM responses.
+
+Keyed by everything that shapes the reply: model, prompt, schema, temperature
+and reasoning effort.
+"""
 
 import hashlib
 import json
@@ -6,9 +10,21 @@ from pathlib import Path
 from typing import Any
 
 
-def cache_key(model: str, prompt: str, schema: dict[str, Any]) -> str:
+def cache_key(
+    model: str,
+    prompt: str,
+    schema: dict[str, Any],
+    temperature: float,
+    reasoning_effort: str | None,
+) -> str:
     payload = json.dumps(
-        {"model": model, "prompt": prompt, "schema": schema},
+        {
+            "model": model,
+            "prompt": prompt,
+            "schema": schema,
+            "temperature": temperature,
+            "reasoning_effort": reasoning_effort,
+        },
         sort_keys=True,
         ensure_ascii=False,
     )

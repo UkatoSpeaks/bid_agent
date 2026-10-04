@@ -37,5 +37,173 @@
     "overhead_pct": "10",
     "profit_pct": "8",
     "sales_tax_pct_on_materials": "7.25"
-  }
+  },
+  "production_rates_note": "ILLUSTRATIVE VALUES ONLY. Northline Mechanical is a fictional company and these production rates were written for the sample data; they are not measured crew productivity and must not be used to price real work.",
+  "production_rates": [
+    {
+      "code": "PR-CU-3T",
+      "description": "Split system condensing unit, 3 ton, furnish and install",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-CU-3T", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "6" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "4" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "2" },
+        { "type": "equipment", "rate_card_code": "EQ-VACPUMP", "quantity_per_unit": "0.25" }
+      ],
+      "notes": "Illustrative. Set on pad, pipe and wire connections, evacuate, start up. Line set and refrigerant charge are separate items."
+    },
+    {
+      "code": "PR-CU-5T",
+      "description": "Split system condensing unit, 5 ton, furnish and install",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-CU-5T", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "8" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "5" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "2" },
+        { "type": "equipment", "rate_card_code": "EQ-VACPUMP", "quantity_per_unit": "0.25" }
+      ],
+      "notes": "Illustrative. Same scope as PR-CU-3T."
+    },
+    {
+      "code": "PR-AHU-3T",
+      "description": "Split system air handler, 3 ton, furnish and install",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-AHU-3T", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "5" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "4" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "1.5" }
+      ],
+      "notes": "Illustrative. Hang or set unit, duct, drain and power connections."
+    },
+    {
+      "code": "PR-AHU-5T",
+      "description": "Split system air handler, 5 ton, furnish and install",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-AHU-5T", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "6.5" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "5" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "1.5" }
+      ],
+      "notes": "Illustrative. Same scope as PR-AHU-3T."
+    },
+    {
+      "code": "PR-RTU-10T-CRANE",
+      "description": "Packaged rooftop unit, 10 ton, furnish and install, set by crane",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-RTU-10T", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "12" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "8" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "4" },
+        { "type": "labor", "rate_card_code": "LAB-SUPV", "quantity_per_unit": "2" },
+        { "type": "equipment", "rate_card_code": "EQ-CRANE-40T", "quantity_per_unit": "3" }
+      ],
+      "notes": "Illustrative. 3 crane hours per unit including mobilisation; curb and structural work excluded."
+    },
+    {
+      "code": "PR-LINESET-50",
+      "description": "Refrigerant line set, 3/8 x 7/8, 50 ft, insulated, installed",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-LINESET-50", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "3" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "2" }
+      ],
+      "notes": "Illustrative. Run, support, braze and pressure test one 50 ft set."
+    },
+    {
+      "code": "PR-DUCT-SPIRAL-12",
+      "description": "Spiral round duct, up to 12 in diameter, installed",
+      "unit": "LF",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-DUCT-SPIRAL-12", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-SHMT", "quantity_per_unit": "0.18" }
+      ],
+      "notes": "Illustrative. Includes hangers and sealing; working height up to 12 ft."
+    },
+    {
+      "code": "PR-DUCT-FLEX-8",
+      "description": "Insulated flexible duct, 8 in, installed",
+      "unit": "LF",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-DUCT-FLEX-8", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "0.06" }
+      ],
+      "notes": "Illustrative. Includes straps and connections at both ends."
+    },
+    {
+      "code": "PR-DUCT-RECT-GALV",
+      "description": "Rectangular galvanized sheet metal ductwork, fabricated and installed, by weight",
+      "unit": "LB",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-DUCT-GALV", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-SHMT", "quantity_per_unit": "0.045" }
+      ],
+      "notes": "Illustrative. About 22 lb installed per sheet metal worker hour; shop fabrication is in the material price."
+    },
+    {
+      "code": "PR-INSUL-WRAP",
+      "description": "Duct wrap insulation, R-6 foil-faced, installed",
+      "unit": "SF",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-INSUL-WRAP", "quantity_per_unit": "1.1" },
+        { "type": "labor", "rate_card_code": "LAB-APPR", "quantity_per_unit": "0.03" }
+      ],
+      "notes": "Illustrative. Material includes 10% for laps and waste."
+    },
+    {
+      "code": "PR-TSTAT-PROG",
+      "description": "Programmable thermostat, installed and wired",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-TSTAT-PROG", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-ELEC", "quantity_per_unit": "1.25" }
+      ],
+      "notes": "Illustrative. Mount, terminate existing low-voltage cable, program."
+    },
+    {
+      "code": "PR-REG-SUP",
+      "description": "Supply register, 10 x 6, installed",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-REG-SUP", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "0.3" }
+      ],
+      "notes": "Illustrative."
+    },
+    {
+      "code": "PR-GRILLE-RET",
+      "description": "Return air grille, 20 x 20, installed",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-GRILLE-RET", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "0.4" }
+      ],
+      "notes": "Illustrative."
+    },
+    {
+      "code": "PR-DAMPER-VCD-12",
+      "description": "Volume control damper, 12 in, installed",
+      "unit": "EA",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-DAMPER-VCD-12", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-SHMT", "quantity_per_unit": "0.75" }
+      ],
+      "notes": "Illustrative."
+    },
+    {
+      "code": "PR-REFRIG-CHARGE",
+      "description": "Refrigerant R-454B, system charge, weighed in",
+      "unit": "LB",
+      "components": [
+        { "type": "material", "rate_card_code": "MAT-REFRIG-454B", "quantity_per_unit": "1" },
+        { "type": "labor", "rate_card_code": "LAB-TECH", "quantity_per_unit": "0.05" }
+      ],
+      "notes": "Illustrative. Charging only; evacuation is in the condensing unit rates."
+    }
+  ]
 }

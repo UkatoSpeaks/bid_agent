@@ -34,7 +34,9 @@ def llm_client() -> LLMClient:
 def create_draft_estimate(file: UploadFile, llm: LLMClient = Depends(llm_client)) -> Estimate:
     """Upload a bid schedule (PDF, Excel or CSV) and get back a draft estimate.
 
-    Priced against the default sample rate card for now.
+    Priced against the default sample rate card for now. The response also
+    carries the review summary (`review`) and the rows that were not treated
+    as bid items (`skipped_rows`).
     """
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in SUPPORTED_EXTENSIONS:
@@ -52,7 +54,7 @@ def create_draft_estimate(file: UploadFile, llm: LLMClient = Depends(llm_client)
         path = Path(directory) / Path(file.filename or f"upload{suffix}").name
         path.write_bytes(file.file.read())
         try:
-            result = draft_estimate(path, rate_card, llm)
+            result = draft_estimate(path, rate_card, llm, settings.high_impact_line_pct)
         except UnsupportedFileTypeError as exc:
             raise HTTPException(status_code=415, detail=str(exc)) from exc
         except DocumentParseError as exc:

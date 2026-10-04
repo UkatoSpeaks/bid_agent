@@ -39,6 +39,10 @@ class BidLineItem(BaseModel):
     flags: list[Flag] = Field(default_factory=list)
     # Where the line came from in the bid document, e.g. "p2-t1-r4".
     source_ref: str | None = None
+    # The company production rate the components were expanded from. None
+    # means the components (if any) are not a company standard: their
+    # quantities per unit were proposed by the LLM.
+    production_rate_code: str | None = None
     # Mapping assumptions (one per component, e.g. labor hours per unit) for
     # the reviewer. Display only: the engine copies them through untouched.
     assumptions: list[str] = Field(default_factory=list)

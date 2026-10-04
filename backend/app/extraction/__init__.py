@@ -9,7 +9,7 @@ from app.extraction.extract import (
 from app.extraction.map import (
     LineMapping,
     LineMappings,
-    MappedComponent,
+    ProposedComponent,
     map_line_items,
     verify_mappings,
 )
@@ -20,7 +20,7 @@ __all__ = [
     "ExtractionResult",
     "LineMapping",
     "LineMappings",
-    "MappedComponent",
+    "ProposedComponent",
     "SkippedLine",
     "extract_line_items",
     "map_line_items",

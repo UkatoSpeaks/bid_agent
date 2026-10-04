@@ -3,7 +3,13 @@
 from decimal import Decimal as D
 
 from app.extraction import LineMappings, map_line_items
-from app.extraction.map import LINES_PER_CALL, candidates_for, shortlist
+from app.extraction.map import (
+    LINES_PER_CALL,
+    candidates_for,
+    production_rates_for,
+    shortlist,
+    shortlist_production_rates,
+)
 from app.pricing import price_estimate
 from app.schemas import BidLineItem, Flag, RateCard
 
@@ -20,18 +26,38 @@ def bid_line(line_id="L001", description="Programmable thermostat", quantity="6"
     )
 
 
-def component(code, type_, quantity_per_unit, confidence="high", rationale="Direct match."):
+def component(code, type_, quantity_per_unit, rationale="Assumes a typical install."):
     return {
         "rate_card_code": code,
         "type": type_,
         "quantity_per_unit": quantity_per_unit,
-        "confidence": confidence,
         "rationale": rationale,
     }
 
 
-def mapping(line_id, components, no_match_reason=None):
-    return {"line_id": line_id, "components": components, "no_match_reason": no_match_reason}
+def standard(line_id, code, confidence="high", rationale="Direct match.", proposed=()):
+    """The LLM picked a production rate."""
+    return {
+        "line_id": line_id,
+        "production_rate_code": code,
+        "confidence": confidence,
+        "rationale": rationale,
+        "proposed_components": list(proposed),
+        "no_match_reason": None,
+    }
+
+
+def assumed(line_id, components, confidence="medium", rationale="No standard rate fits.",
+            no_match_reason=None):  # fmt: skip
+    """The LLM found no production rate and proposed its own components."""
+    return {
+        "line_id": line_id,
+        "production_rate_code": None,
+        "confidence": confidence,
+        "rationale": rationale,
+        "proposed_components": components,
+        "no_match_reason": no_match_reason,
+    }
 
 
 def run_mapping(lines, mappings, rate_card):
@@ -43,56 +69,209 @@ def codes(line):
     return [(flag.severity, flag.code) for flag in line.flags]
 
 
-def test_valid_mapping_gives_components_and_records_assumptions(sample_rate_card):
+def test_production_rate_is_expanded_into_the_companys_components(sample_rate_card):
+    # The LLM only names PR-TSTAT-PROG. The components come from the rate
+    # card: 1 EA of MAT-TSTAT-PROG and 1.25 hrs of LAB-ELEC per thermostat.
     mapped, llm = run_mapping(
+        [bid_line()], [standard("L001", "PR-TSTAT-PROG")], sample_rate_card
+    )
+
+    line = mapped[0]
+    assert line.production_rate_code == "PR-TSTAT-PROG"
+    assert [(c.type, c.rate_card_code, c.quantity_per_unit) for c in line.components] == [
+        ("material", "MAT-TSTAT-PROG", D("1")),
+        ("labor", "LAB-ELEC", D("1.25")),
+    ]
+    assert line.flags == []
+    assert line.assumptions == [
+        "Standard production rate PR-TSTAT-PROG (Programmable thermostat, installed "
+        "and wired), per EA [high confidence] Direct match.",
+        "Material MAT-TSTAT-PROG (Programmable thermostat): 1 EA per EA "
+        "[company standard PR-TSTAT-PROG]",
+        "Labor LAB-ELEC (Electrician): 1.25 hrs per EA [company standard PR-TSTAT-PROG]",
+    ]
+
+    # The prompt lists production rates by code, description and unit. It
+    # never shows a price or the hours inside a production rate.
+    _schema, prompt = llm.calls[0]
+    assert "PR-TSTAT-PROG | Programmable thermostat, installed and wired | EA" in prompt
+    assert "material | MAT-TSTAT-PROG | Programmable thermostat | EA" in prompt
+    assert "145.00" not in prompt and "92.00" not in prompt
+    assert "1.25" not in prompt
+
+    # Ready for the pricing engine: 6 x 1 x $145.00 + 6 x 1.25 x $92.00 = 1,560.00
+    estimate = price_estimate(mapped, sample_rate_card)
+    assert estimate.lines[0].line_subtotal == D("1560.00")
+    assert estimate.lines[0].rate_basis == "standard"
+    assert estimate.lines[0].production_rate_code == "PR-TSTAT-PROG"
+    assert estimate.lines[0].assumptions == line.assumptions
+
+
+def test_multi_component_production_rate_expands_every_component(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line(description="Packaged rooftop unit, 10 ton, set by crane", quantity="3")],
+        [standard("L001", "PR-RTU-10T-CRANE")],
+        sample_rate_card,
+    )
+
+    assert [(c.rate_card_code, c.quantity_per_unit) for c in mapped[0].components] == [
+        ("MAT-RTU-10T", D("1")),
+        ("LAB-TECH", D("12")),
+        ("LAB-APPR", D("8")),
+        ("LAB-ELEC", D("4")),
+        ("LAB-SUPV", D("2")),
+        ("EQ-CRANE-40T", D("3")),
+    ]
+
+
+def test_quantities_proposed_alongside_a_production_rate_are_ignored(sample_rate_card):
+    # A chosen standard rate wins: the LLM's own 4 hours never reach pricing.
+    mapped, _ = run_mapping(
         [bid_line()],
         [
-            mapping(
-                "L001",
-                [
-                    component("MAT-TSTAT-PROG", "material", "1"),
-                    component(
-                        "LAB-ELEC",
-                        "labor",
-                        "1.5",
-                        confidence="medium",
-                        rationale="Assumes 1.5 hours to mount and wire each thermostat.",
-                    ),
-                ],
+            standard(
+                "L001", "PR-TSTAT-PROG", proposed=[component("LAB-ELEC", "labor", "4")]
             )
         ],
         sample_rate_card,
     )
 
     line = mapped[0]
-    assert [(c.type, c.rate_card_code, c.quantity_per_unit) for c in line.components] == [
-        ("material", "MAT-TSTAT-PROG", D("1")),
-        ("labor", "LAB-ELEC", D("1.5")),
+    assert [(c.rate_card_code, c.quantity_per_unit) for c in line.components] == [
+        ("MAT-TSTAT-PROG", D("1")),
+        ("LAB-ELEC", D("1.25")),
     ]
-    assert line.flags == []
-    assert line.assumptions == [
-        "Material MAT-TSTAT-PROG (Programmable thermostat): 1 EA per EA "
-        "[high confidence] Direct match.",
-        "Labor LAB-ELEC (Electrician): 1.5 hrs per EA "
-        "[medium confidence] Assumes 1.5 hours to mount and wire each thermostat.",
-    ]
+    assert codes(line) == [("info", "PROPOSED_COMPONENTS_IGNORED")]
 
-    # The prompt lists codes and names, never prices.
-    _schema, prompt = llm.calls[0]
-    assert "material | MAT-TSTAT-PROG | Programmable thermostat | EA" in prompt
-    assert "145.00" not in prompt and "92.00" not in prompt
 
-    # Ready for the pricing engine: 6 x 1 x $145.00 + 6 x 1.5 x $92.00 = 1,698.00
+def test_unknown_production_rate_is_a_blocker_and_nothing_is_priced(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line()],
+        [
+            standard(
+                "L001",
+                "PR-TSTAT-WIFI",  # invented
+                proposed=[component("LAB-ELEC", "labor", "1")],
+            )
+        ],
+        sample_rate_card,
+    )
+
+    line = mapped[0]
+    assert line.components == []
+    assert line.production_rate_code is None
+    assert codes(line) == [("blocker", "UNKNOWN_PRODUCTION_RATE")]
+    assert "PR-TSTAT-WIFI" in line.flags[0].message
+
+
+def test_medium_confidence_in_a_standard_rate_is_not_flagged(sample_rate_card):
+    # "medium" now only says the bid line left a detail open. The numbers are
+    # the company's either way, and the confidence is shown in the assumptions.
+    mapped, _ = run_mapping(
+        [bid_line(description="Supply registers", quantity="64", unit="Each")],
+        [standard("L001", "PR-REG-SUP", confidence="medium", rationale="No size stated.")],
+        sample_rate_card,
+    )
+
+    assert mapped[0].flags == []
+    assert "[medium confidence] No size stated." in mapped[0].assumptions[0]
+
+
+def test_low_confidence_in_a_standard_rate_gives_a_warning(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line(description="Thermostat", quantity="2")],
+        [standard("L001", "PR-TSTAT-PROG", confidence="low", rationale="Type not stated.")],
+        sample_rate_card,
+    )
+
+    line = mapped[0]
+    assert len(line.components) == 2
+    assert codes(line) == [("warning", "LOW_CONFIDENCE_MAPPING")]
+    assert "Type not stated." in line.flags[0].message
+
+
+def test_assumed_production_rate_is_flagged_even_at_high_confidence(sample_rate_card):
+    # No standard rate for refrigerant recovery, so the LLM proposes its own
+    # numbers. "high" confidence does not make them company data.
+    for confidence in ("high", "medium", "low"):
+        mapped, _ = run_mapping(
+            [bid_line(description="Recover refrigerant from existing unit", quantity="3")],
+            [
+                assumed(
+                    "L001",
+                    [
+                        component("LAB-TECH", "labor", "1.5"),
+                        component("EQ-RECOVERY", "equipment", "0.125"),
+                    ],
+                    confidence=confidence,
+                )
+            ],
+            sample_rate_card,
+        )
+
+        line = mapped[0]
+        assert line.production_rate_code is None
+        assert [(c.rate_card_code, c.quantity_per_unit) for c in line.components] == [
+            ("LAB-TECH", D("1.5")),
+            ("EQ-RECOVERY", D("0.125")),
+        ]
+        assert ("warning", "ASSUMED_PRODUCTION_RATE") in codes(line)
+        # The flag lists each guessed number.
+        message = next(f.message for f in line.flags if f.code == "ASSUMED_PRODUCTION_RATE")
+        assert "1.5 hrs per EA of LAB-TECH (HVAC Technician)" in message
+        assert "0.125 day per EA of EQ-RECOVERY (Refrigerant recovery machine)" in message
+        assert all("[ASSUMED by the LLM" in a for a in line.assumptions)
+        # Low confidence adds its own warning on top.
+        assert (("warning", "LOW_CONFIDENCE_MAPPING") in codes(line)) == (confidence == "low")
+
+        assert price_estimate(mapped, sample_rate_card).lines[0].rate_basis == "assumed"
+
+
+def test_unit_mismatch_is_a_blocker_and_the_components_are_not_priced(sample_rate_card):
+    # PR-DUCT-SPIRAL-12 is per LF; the bid line is a lump sum.
+    mapped, _ = run_mapping(
+        [bid_line(description="Spiral duct, 12 in round", quantity="1", unit="LS")],
+        [standard("L001", "PR-DUCT-SPIRAL-12")],
+        sample_rate_card,
+    )
+
+    line = mapped[0]
+    assert line.components == []
+    assert line.production_rate_code == "PR-DUCT-SPIRAL-12"  # the choice is kept
+    assert codes(line) == [("blocker", "UNIT_MISMATCH")]
+    assert "'LS'" in line.flags[0].message and "per LF" in line.flags[0].message
+
     estimate = price_estimate(mapped, sample_rate_card)
-    assert estimate.lines[0].line_subtotal == D("1698.00")
-    assert estimate.lines[0].assumptions == line.assumptions
+    assert estimate.lines[0].line_subtotal == D("0.00")
+    assert estimate.lines[0].rate_basis == "none"
+
+
+def test_differently_spelled_units_are_not_a_mismatch(sample_rate_card):
+    lines = [
+        bid_line("L001", "Spiral duct, 12 in round", "100", unit="lin. ft"),
+        bid_line("L002", "Thermostats, programmable", "11", unit="Each"),
+        bid_line("L003", "Refrigerant line sets, 50 ft", "2", unit="ea."),
+    ]
+    mapped, _ = run_mapping(
+        lines,
+        [
+            standard("L001", "PR-DUCT-SPIRAL-12"),
+            standard("L002", "PR-TSTAT-PROG"),
+            standard("L003", "PR-LINESET-50"),
+        ],
+        sample_rate_card,
+    )
+
+    assert all(line.flags == [] and line.components for line in mapped)
+    # 100 x 1 x $11.50 + 100 x 0.18 x $78.00 = 1,150.00 + 1,404.00 = 2,554.00
+    assert price_estimate(mapped, sample_rate_card).lines[0].line_subtotal == D("2554.00")
 
 
 def test_unknown_code_is_dropped_with_a_blocker(sample_rate_card):
     mapped, _ = run_mapping(
         [bid_line()],
         [
-            mapping(
+            assumed(
                 "L001",
                 [
                     component("MAT-TSTAT-WIFI", "material", "1"),  # invented
@@ -105,7 +284,10 @@ def test_unknown_code_is_dropped_with_a_blocker(sample_rate_card):
 
     line = mapped[0]
     assert [c.rate_card_code for c in line.components] == ["LAB-ELEC"]
-    assert codes(line) == [("blocker", "UNKNOWN_RATE_CODE")]
+    assert codes(line) == [
+        ("blocker", "UNKNOWN_RATE_CODE"),
+        ("warning", "ASSUMED_PRODUCTION_RATE"),
+    ]
     assert "MAT-TSTAT-WIFI" in line.flags[0].message
     assert len(line.assumptions) == 1  # only the component that was kept
 
@@ -114,7 +296,7 @@ def test_code_under_the_wrong_type_is_dropped_with_a_blocker(sample_rate_card):
     # LAB-ELEC exists, but it is labor, not material.
     mapped, _ = run_mapping(
         [bid_line()],
-        [mapping("L001", [component("LAB-ELEC", "material", "1")])],
+        [assumed("L001", [component("LAB-ELEC", "material", "1")])],
         sample_rate_card,
     )
 
@@ -122,37 +304,10 @@ def test_code_under_the_wrong_type_is_dropped_with_a_blocker(sample_rate_card):
     assert codes(mapped[0]) == [("blocker", "UNKNOWN_RATE_CODE")]
 
 
-def test_low_confidence_gives_a_warning_and_keeps_the_component(sample_rate_card):
-    mapped, _ = run_mapping(
-        [bid_line(description="Misc. ductwork modifications as required", quantity="1", unit="LS")],
-        [
-            mapping(
-                "L001",
-                [
-                    component(
-                        "LAB-SHMT",
-                        "labor",
-                        "16",
-                        confidence="low",
-                        rationale="Scope is undefined; assumes two days of sheet metal work.",
-                    )
-                ],
-            )
-        ],
-        sample_rate_card,
-    )
-
-    line = mapped[0]
-    assert [c.quantity_per_unit for c in line.components] == [D("16")]
-    assert codes(line) == [("warning", "LOW_CONFIDENCE_MAPPING")]
-    assert "two days" in line.flags[0].message
-    assert "[low confidence]" in line.assumptions[0]
-
-
 def test_no_match_keeps_the_reason_and_the_engine_blocks_the_line(sample_rate_card):
     mapped, _ = run_mapping(
         [bid_line(description="Kitchen exhaust hood fire suppression system", quantity="1")],
-        [mapping("L001", [], no_match_reason="No fire suppression entries in the rate card.")],
+        [assumed("L001", [], no_match_reason="No fire suppression entries in the rate card.")],
         sample_rate_card,
     )
 
@@ -172,7 +327,7 @@ def test_invalid_quantity_per_unit_is_dropped_with_a_blocker(sample_rate_card):
     mapped, _ = run_mapping(
         [bid_line()],
         [
-            mapping(
+            assumed(
                 "L001",
                 [
                     component("MAT-TSTAT-PROG", "material", "one"),
@@ -192,11 +347,7 @@ def test_invalid_quantity_per_unit_is_dropped_with_a_blocker(sample_rate_card):
 
 def test_line_missing_from_the_llm_reply_gets_a_blocker(sample_rate_card):
     lines = [bid_line("L001"), bid_line("L002")]
-    mapped, _ = run_mapping(
-        lines,
-        [mapping("L002", [component("MAT-TSTAT-PROG", "material", "1")])],
-        sample_rate_card,
-    )
+    mapped, _ = run_mapping(lines, [standard("L002", "PR-TSTAT-PROG")], sample_rate_card)
 
     assert codes(mapped[0]) == [("blocker", "MAPPING_MISSING")]
     assert mapped[1].flags == []
@@ -207,14 +358,13 @@ def test_existing_flags_are_kept_and_input_lines_are_not_modified(sample_rate_ca
     line.flags.append(Flag(severity="info", code="EXTRACTION_NOTE", message="check"))
 
     mapped, _ = run_mapping(
-        [line],
-        [mapping("L001", [component("MAT-TSTAT-PROG", "material", "1", confidence="low")])],
-        sample_rate_card,
+        [line], [standard("L001", "PR-TSTAT-PROG", confidence="low")], sample_rate_card
     )
 
     assert [f.code for f in mapped[0].flags] == ["EXTRACTION_NOTE", "LOW_CONFIDENCE_MAPPING"]
     assert [f.code for f in line.flags] == ["EXTRACTION_NOTE"]
     assert line.components == []
+    assert line.production_rate_code is None
 
 
 def test_lines_are_mapped_in_batches(sample_rate_card):
@@ -224,7 +374,7 @@ def test_lines_are_mapped_in_batches(sample_rate_card):
         # Answer for whichever lines this prompt contains.
         return {
             "lines": [
-                mapping(line.id, [component("MAT-TSTAT-PROG", "material", "1")])
+                standard(line.id, "PR-TSTAT-PROG")
                 for line in lines
                 if f"\n{line.id} | " in prompt
             ]
@@ -235,13 +385,12 @@ def test_lines_are_mapped_in_batches(sample_rate_card):
 
     assert len(llm.calls) == 2
     assert [line.id for line in mapped] == [line.id for line in lines]
-    assert all(len(line.components) == 1 for line in mapped)
+    assert all(len(line.components) == 2 for line in mapped)
 
 
 def test_small_rate_card_is_sent_whole(sample_rate_card):
-    candidates = candidates_for([bid_line()], sample_rate_card)
-
-    assert len(candidates) == 24  # 5 labor + 15 materials + 4 equipment
+    assert len(candidates_for([bid_line()], sample_rate_card)) == 24  # 5 + 15 + 4
+    assert len(production_rates_for([bid_line()], sample_rate_card)) == 15
 
 
 def test_shortlist_ranks_similar_entries_first(sample_rate_card):
@@ -253,10 +402,28 @@ def test_shortlist_ranks_similar_entries_first(sample_rate_card):
     assert len([c for c in top if c.type == "labor"]) == 3
 
 
+def test_production_rate_shortlist_ranks_similar_descriptions_first(sample_rate_card):
+    top = shortlist_production_rates('Spiral duct, 12" round', sample_rate_card, limit=3)
+
+    assert len(top) == 3
+    assert top[0].code == "PR-DUCT-SPIRAL-12"
+
+
 def test_large_rate_card_is_shortlisted(sample_rate_card):
     data = sample_rate_card.model_dump()
     data["materials"] += [
         {"code": f"MAT-PIPE-{n}", "name": f"Copper pipe, type L, size {n}", "unit": "LF", "unit_cost": "9"}
+        for n in range(30)
+    ]
+    data["production_rates"] += [
+        {
+            "code": f"PR-PIPE-{n}",
+            "description": f"Copper pipe, type L, size {n}, installed",
+            "unit": "LF",
+            "components": [
+                {"type": "material", "rate_card_code": f"MAT-PIPE-{n}", "quantity_per_unit": "1"}
+            ],
+        }
         for n in range(30)
     ]
     big_card = RateCard.model_validate(data)
@@ -268,3 +435,7 @@ def test_large_rate_card_is_shortlisted(sample_rate_card):
     assert "MAT-TSTAT-PROG" in materials
     # Small sections still come through whole.
     assert len([c for c in candidates if c.type == "labor"]) == 5
+
+    production_rates = [rate.code for rate in production_rates_for([bid_line()], big_card)]
+    assert len(production_rates) == 8
+    assert "PR-TSTAT-PROG" in production_rates
