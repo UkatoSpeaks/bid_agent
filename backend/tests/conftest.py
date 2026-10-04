@@ -1,8 +1,14 @@
 from decimal import Decimal
 
 import pytest
+from pydantic import BaseModel
 
+from app.config import BACKEND_DIR
+from app.llm import LLMClient
+from app.pricing import load_rate_card
 from app.schemas import BidLineItem, LineItemComponent, RateCard
+
+BIDS_DIR = BACKEND_DIR / "data" / "bids"
 
 
 @pytest.fixture
@@ -57,3 +63,31 @@ def make_line(
             for t, code, q in components
         ],
     )
+
+
+class FakeLLMClient(LLMClient):
+    """Returns canned responses per schema and records every prompt.
+
+    `responses` maps a schema class to a list of replies, handed out in call
+    order. A reply is a dict (validated against the schema), or a callable
+    taking the prompt and returning a dict.
+    """
+
+    def __init__(self, responses: dict[type[BaseModel], list]) -> None:
+        self._responses = {schema: list(replies) for schema, replies in responses.items()}
+        self.calls: list[tuple[type[BaseModel], str]] = []
+
+    def structured(self, prompt, schema):
+        self.calls.append((schema, prompt))
+        replies = self._responses.get(schema)
+        assert replies, f"FakeLLMClient has no reply left for {schema.__name__}"
+        reply = replies.pop(0)
+        if callable(reply):
+            reply = reply(prompt)
+        return schema.model_validate(reply)
+
+
+@pytest.fixture
+def sample_rate_card() -> RateCard:
+    """The real Northline Mechanical sample rate card."""
+    return load_rate_card(BACKEND_DIR / "data" / "rate_cards" / "hvac_rate_card.json")

@@ -23,33 +23,35 @@ Across the estimate:
     4. subtotal        = direct_labor
                          + direct_material + material_markup + sales_tax
                          + direct_equipment
-    5. overhead        = subtotal x overhead_pct
-    6. profit          = (subtotal + overhead) x profit_pct
-    7. grand_total     = subtotal + overhead + profit
+    5. overhead        = round(subtotal x overhead_pct)
+    6. profit          = round((subtotal + overhead) x profit_pct)
+    7. grand_total     = round(subtotal) + overhead + profit
 
 Labor and equipment carry no markup or tax of their own; they only pick up
 overhead and profit.
 
 Rounding
 --------
-Money is rounded to 2 decimals with ROUND_HALF_UP (0.125 -> 0.13), and only
-in two places:
+Money is rounded to 2 decimals with ROUND_HALF_UP (0.125 -> 0.13), in three
+places:
 
     * Line level: a line's labor, material and equipment costs are each
       rounded once, after summing that line's unrounded component costs.
       line_subtotal is the sum of those three rounded figures, and the direct
       totals are sums of the rounded line costs, so lines always add up to
       the direct totals exactly.
-    * Final totals: markup, tax, subtotal, overhead, profit and grand total
-      are computed in a chain at full Decimal precision, and each is rounded
-      once when it is reported. A rounded figure is never fed into a later
-      step.
+    * Markup, tax and subtotal are computed in a chain at full Decimal
+      precision, and each is rounded once when it is reported. Overhead and
+      profit are calculated from the unrounded subtotal (and unrounded
+      overhead), so half-cent errors do not compound through the chain.
+    * Overhead and profit are each rounded once, and grand_total is the sum
+      of the three reported figures: subtotal + overhead + profit. The bottom
+      of the estimate therefore always adds up exactly as displayed.
 
-Rounding mid-calculation would let half-cent errors compound through the
-markup -> tax -> overhead -> profit chain. The trade-off is that a reported
-total can differ by a cent from re-adding the reported figures above it
-(e.g. subtotal + overhead + profit vs. grand_total); the reported total is
-the more accurate number.
+The trade-off is that grand_total can differ by a cent from the full
+precision chain. One cent of drift can also remain higher up: the reported
+subtotal may differ by a cent from re-adding the reported direct costs,
+markup and tax, because those are rounded independently of it.
 """
 
 from decimal import ROUND_HALF_UP, Decimal
@@ -108,7 +110,8 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
     direct_material = sum((p.material_cost for p in priced), ZERO)
     direct_equipment = sum((p.equipment_cost for p in priced), ZERO)
 
-    # Full precision from here down; each figure is rounded only when reported.
+    # Full precision through the subtotal; each figure is rounded only when
+    # reported.
     markups = rate_card.markups
     material_markup = direct_material * markups.material_markup_pct / HUNDRED
     sales_tax = (
@@ -121,7 +124,12 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
     )
     overhead = subtotal * markups.overhead_pct / HUNDRED
     profit = (subtotal + overhead) * markups.profit_pct / HUNDRED
-    grand_total = subtotal + overhead + profit
+    # Overhead and profit are rounded before summing so that the reported
+    # subtotal + overhead + profit equals the reported grand total exactly.
+    reported_subtotal = round_money(subtotal)
+    reported_overhead = round_money(overhead)
+    reported_profit = round_money(profit)
+    grand_total = reported_subtotal + reported_overhead + reported_profit
 
     return Estimate(
         currency=currency,
@@ -132,10 +140,10 @@ def price_estimate(lines: list[BidLineItem], rate_card: RateCard) -> Estimate:
             material_markup=round_money(material_markup),
             sales_tax=round_money(sales_tax),
             direct_equipment=direct_equipment,
-            subtotal=round_money(subtotal),
-            overhead=round_money(overhead),
-            profit=round_money(profit),
-            grand_total=round_money(grand_total),
+            subtotal=reported_subtotal,
+            overhead=reported_overhead,
+            profit=reported_profit,
+            grand_total=grand_total,
         ),
         all_flags=[
             LineFlag(line_id=p.id, **flag.model_dump())
@@ -254,6 +262,8 @@ def _price_line(line: BidLineItem, index: _RateIndex, currency: str) -> PricedLi
         line_subtotal=line_subtotal,
         calculation_trace=trace,
         flags=flags,
+        source_ref=line.source_ref,
+        assumptions=list(line.assumptions),
     )
 
 

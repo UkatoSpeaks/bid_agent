@@ -8,13 +8,26 @@ dependencies = [
     "uvicorn>=0.30",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
+    "groq>=1.7.0",
+    "pdfplumber>=0.11.10",
+    "pandas>=3.0.6",
+    "openpyxl>=3.1.5",
+    "rapidfuzz>=3.14.6",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest>=8.0",
+    "reportlab>=5.0.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "live: calls the real LLM API (needs GROQ_API_KEY); run with `pytest -m live`",
+]
+# Live tests are skipped unless selected explicitly with `-m live`.
+addopts = "-m 'not live'"

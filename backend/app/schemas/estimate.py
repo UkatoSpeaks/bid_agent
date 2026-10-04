@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.bid import Flag
 
@@ -22,6 +22,8 @@ class PricedLine(BaseModel):
     # Human-readable record of every multiplication behind the costs above.
     calculation_trace: list[str]
     flags: list[Flag]
+    source_ref: str | None = None
+    assumptions: list[str] = Field(default_factory=list)
 
 
 class EstimateTotals(BaseModel):

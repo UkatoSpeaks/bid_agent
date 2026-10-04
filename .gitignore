@@ -15,6 +15,9 @@ frontend/dist/
 frontend/.next/
 npm-debug.log*
 
+# LLM response cache
+.cache/
+
 # Secrets / local config
 .env
 .env.*

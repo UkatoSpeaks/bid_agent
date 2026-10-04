@@ -37,3 +37,8 @@ class BidLineItem(BaseModel):
     unit: str
     components: list[LineItemComponent] = Field(default_factory=list)
     flags: list[Flag] = Field(default_factory=list)
+    # Where the line came from in the bid document, e.g. "p2-t1-r4".
+    source_ref: str | None = None
+    # Mapping assumptions (one per component, e.g. labor hours per unit) for
+    # the reviewer. Display only: the engine copies them through untouched.
+    assumptions: list[str] = Field(default_factory=list)

@@ -83,15 +83,15 @@ def test_mixed_line_labor_material_equipment(rate_card):
     # overhead    = 1,894.04 x 10%      = 189.404     ->  189.40
     # profit      = (1,894.04 + 189.404) x 10%
     #             = 2,083.444 x 10%     = 208.3444    ->  208.34
-    # grand total = 1,894.04 + 189.404 + 208.3444
-    #             = 2,291.7884                        -> 2,291.79
+    # grand total = 1,894.04 + 189.40 + 208.34        = 2,291.78
+    #   (sum of the rounded figures; the unrounded chain gives 2,291.7884)
     totals = estimate.totals
     assert totals.material_markup == D("58.00")
     assert totals.sales_tax == D("51.04")
     assert totals.subtotal == D("1894.04")
     assert totals.overhead == D("189.40")
     assert totals.profit == D("208.34")
-    assert totals.grand_total == D("2291.79")
+    assert totals.grand_total == D("2291.78")
 
 
 def test_markup_tax_overhead_profit_order_on_two_lines(rate_card):
@@ -147,7 +147,7 @@ def test_markup_tax_overhead_profit_order_on_two_lines(rate_card):
     #   (profit on subtotal alone would be 589.59)
     assert totals.profit == D("648.55")
 
-    # grand total = 5,895.92 + 589.592 + 648.5512 = 7,134.0632 -> 7,134.06
+    # grand total = 5,895.92 + 589.59 + 648.55 = 7,134.06
     assert totals.grand_total == D("7134.06")
 
 
@@ -260,13 +260,13 @@ def test_lines_round_individually_and_totals_sum_rounded_lines(rate_card):
     assert estimate.totals.direct_material == D("0.26")
 
 
-def test_totals_are_not_rounded_mid_calculation(rate_card):
+def test_grand_total_is_the_sum_of_the_reported_figures(rate_card):
     # Same line as test_mixed_line_labor_material_equipment:
     #   subtotal 1,894.04, overhead 189.404, profit 208.3444.
-    # Unrounded chain: 1,894.04 + 189.404 + 208.3444 = 2,291.7884 -> 2,291.79
-    # Had overhead and profit been rounded first (189.40 and 208.34), the
-    # grand total would be 2,291.78. The reported figures therefore differ
-    # by a cent from the reported grand total, as documented in engine.py.
+    # Overhead and profit are rounded before summing (189.40 and 208.34):
+    #   1,894.04 + 189.40 + 208.34 = 2,291.78
+    # The unrounded chain would give 2,291.7884 -> 2,291.79, a cent more
+    # than the figures displayed above it.
     line = make_line(
         "1",
         "4",
@@ -279,8 +279,29 @@ def test_totals_are_not_rounded_mid_calculation(rate_card):
 
     totals = price_estimate([line], rate_card).totals
 
-    assert totals.grand_total == D("2291.79")
-    assert totals.subtotal + totals.overhead + totals.profit == D("2291.78")
+    assert totals.grand_total == D("2291.78")
+    assert totals.subtotal + totals.overhead + totals.profit == totals.grand_total
+
+
+def test_profit_is_calculated_from_unrounded_overhead(rate_card):
+    # 3 x 1 EA x $0.125 = 0.375 -> 0.38 direct material (rounded at line level)
+    #   markup   = 0.38 x 10%              = 0.038
+    #   tax      = (0.38 + 0.038) x 8%     = 0.03344
+    #   subtotal = 0.38 + 0.038 + 0.03344  = 0.45144    -> 0.45
+    #   overhead = 0.45144 x 10%           = 0.045144   -> 0.05
+    #   profit   = (0.45144 + 0.045144) x 10%
+    #            = 0.0496584                            -> 0.05
+    #     (from the rounded figures it would be (0.45 + 0.05) x 10% = 0.05
+    #      here too, but the inputs to each step stay unrounded)
+    #   grand total = 0.45 + 0.05 + 0.05 = 0.55
+    line = make_line("1", "3", [("material", "M-SCREW", "1")])
+
+    totals = price_estimate([line], rate_card).totals
+
+    assert totals.subtotal == D("0.45")
+    assert totals.overhead == D("0.05")
+    assert totals.profit == D("0.05")
+    assert totals.grand_total == D("0.55")
 
 
 def test_pricing_is_deterministic(rate_card):

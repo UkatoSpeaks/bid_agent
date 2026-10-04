@@ -20,6 +20,21 @@ class Settings(BaseSettings):
     app_env: str = "development"
     rate_card_path: Path = Path("data/rate_cards/hvac_rate_card.json")
 
+    # LLM (extraction and classification only; it never prices anything).
+    groq_api_key: str | None = None
+    llm_model: str = "openai/gpt-oss-120b"
+    llm_temperature: float = 0.2
+    llm_reasoning_effort: str = "medium"
+    llm_cache: bool = True
+    llm_cache_dir: Path = Path(".cache/llm")
+
+    @property
+    def resolved_llm_cache_dir(self) -> Path:
+        """Absolute cache directory; relative values resolve from backend/."""
+        if self.llm_cache_dir.is_absolute():
+            return self.llm_cache_dir
+        return BACKEND_DIR / self.llm_cache_dir
+
     @property
     def resolved_rate_card_path(self) -> Path:
         """Absolute rate card path; relative values resolve from backend/."""
