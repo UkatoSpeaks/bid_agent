@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     # A line above this share of the subtotal (percent) is flagged
     # HIGH_IMPACT_LINE, and blocked if it rests on an assumed production rate.
     high_impact_line_pct: Decimal = Decimal("15")
+    # If the LLM uses no production rate for a line although one matches its
+    # description with at least this rapidfuzz score (0-100), the line is
+    # flagged STANDARD_RATE_DECLINED.
+    standard_rate_declined_score: float = 85.0
+    # Origins allowed to call the API from a browser, comma separated.
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # LLM (extraction and classification only; it never prices anything).
     groq_api_key: str | None = None
@@ -31,6 +37,10 @@ class Settings(BaseSettings):
     llm_reasoning_effort: str = "medium"
     llm_cache: bool = True
     llm_cache_dir: Path = Path(".cache/llm")
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     @property
     def resolved_llm_cache_dir(self) -> Path:

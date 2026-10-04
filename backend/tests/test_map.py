@@ -287,6 +287,8 @@ def test_unknown_code_is_dropped_with_a_blocker(sample_rate_card):
     assert codes(line) == [
         ("blocker", "UNKNOWN_RATE_CODE"),
         ("warning", "ASSUMED_PRODUCTION_RATE"),
+        # "Programmable thermostat" has a company rate the LLM did not use.
+        ("warning", "STANDARD_RATE_DECLINED"),
     ]
     assert "MAT-TSTAT-WIFI" in line.flags[0].message
     assert len(line.assumptions) == 1  # only the component that was kept
@@ -301,7 +303,10 @@ def test_code_under_the_wrong_type_is_dropped_with_a_blocker(sample_rate_card):
     )
 
     assert mapped[0].components == []
-    assert codes(mapped[0]) == [("blocker", "UNKNOWN_RATE_CODE")]
+    assert codes(mapped[0]) == [
+        ("blocker", "UNKNOWN_RATE_CODE"),
+        ("warning", "STANDARD_RATE_DECLINED"),
+    ]
 
 
 def test_no_match_keeps_the_reason_and_the_engine_blocks_the_line(sample_rate_card):
@@ -342,6 +347,7 @@ def test_invalid_quantity_per_unit_is_dropped_with_a_blocker(sample_rate_card):
     assert codes(mapped[0]) == [
         ("blocker", "INVALID_QUANTITY_PER_UNIT"),
         ("blocker", "INVALID_QUANTITY_PER_UNIT"),
+        ("warning", "STANDARD_RATE_DECLINED"),
     ]
 
 
@@ -439,3 +445,118 @@ def test_large_rate_card_is_shortlisted(sample_rate_card):
     production_rates = [rate.code for rate in production_rates_for([bid_line()], big_card)]
     assert len(production_rates) == 8
     assert "PR-TSTAT-PROG" in production_rates
+
+
+# STANDARD_RATE_DECLINED: the LLM used no production rate although one matches.
+
+
+def declined_flags(line):
+    return [flag for flag in line.flags if flag.code == "STANDARD_RATE_DECLINED"]
+
+
+def test_declined_standard_rate_is_flagged_with_the_rate_to_apply(sample_rate_card):
+    # The case from the consistency check: "Supply registers" has a company
+    # rate (PR-REG-SUP), but the LLM guessed its own numbers instead.
+    mapped, _ = run_mapping(
+        [bid_line(description="Supply registers", quantity="64", unit="Each")],
+        [
+            assumed(
+                "L001",
+                [
+                    component("MAT-REG-SUP", "material", "1"),
+                    component("LAB-TECH", "labor", "0.5"),
+                ],
+            )
+        ],
+        sample_rate_card,
+    )
+
+    line = mapped[0]
+    assert codes(line) == [
+        ("warning", "ASSUMED_PRODUCTION_RATE"),
+        ("warning", "STANDARD_RATE_DECLINED"),
+    ]
+    flag = declined_flags(line)[0]
+    assert flag.suggested_production_rate_code == "PR-REG-SUP"
+    assert "PR-REG-SUP (Supply register, 10 x 6, installed), per EA" in flag.message
+    assert "score 100 of 100, threshold 85" in flag.message
+    # The flag only suggests: the line still carries the LLM's own numbers.
+    assert line.production_rate_code is None
+    assert [c.quantity_per_unit for c in line.components] == [D("1"), D("0.5")]
+
+
+def test_declined_flag_is_raised_when_the_llm_maps_nothing_at_all(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line(description="Return air grille, 20 x 20")],
+        [assumed("L001", [], no_match_reason="Not sure which rate applies.")],
+        sample_rate_card,
+    )
+
+    assert codes(mapped[0]) == [
+        ("warning", "STANDARD_RATE_DECLINED"),
+        ("warning", "NO_RATE_CARD_MATCH"),
+    ]
+    assert declined_flags(mapped[0])[0].suggested_production_rate_code == "PR-GRILLE-RET"
+
+
+def test_no_declined_flag_when_no_production_rate_is_close(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line(description="Recover refrigerant from existing rooftop units", quantity="3")],
+        [assumed("L001", [component("LAB-TECH", "labor", "2")])],
+        sample_rate_card,
+    )
+
+    assert codes(mapped[0]) == [("warning", "ASSUMED_PRODUCTION_RATE")]
+
+
+def test_no_declined_flag_when_the_llm_chose_a_production_rate(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line(description="Supply registers", quantity="64")],
+        [standard("L001", "PR-REG-SUP")],
+        sample_rate_card,
+    )
+
+    assert mapped[0].flags == []
+
+
+def test_declined_flag_ignores_rates_in_another_unit(sample_rate_card):
+    # PR-REG-SUP is per EA. Applied to a lump sum it would only be a
+    # UNIT_MISMATCH, so it is not suggested.
+    mapped, _ = run_mapping(
+        [bid_line(description="Supply registers", quantity="1", unit="LS")],
+        [assumed("L001", [component("MAT-REG-SUP", "material", "64")])],
+        sample_rate_card,
+    )
+
+    assert declined_flags(mapped[0]) == []
+
+
+def test_declined_score_threshold_is_configurable(sample_rate_card):
+    # "Add return air grille, 20 x 20, at corridor" scores 81 against
+    # PR-GRILLE-RET: under the default threshold of 85, over one of 80.
+    line = bid_line(description="Add return air grille, 20 x 20, at corridor")
+    mapping = assumed("L001", [component("MAT-GRILLE-RET", "material", "1")])
+
+    default = map_line_items(
+        [line], sample_rate_card, FakeLLMClient({LineMappings: [{"lines": [mapping]}]})
+    )
+    lowered = map_line_items(
+        [line],
+        sample_rate_card,
+        FakeLLMClient({LineMappings: [{"lines": [mapping]}]}),
+        declined_rate_score=80,
+    )
+
+    assert declined_flags(default[0]) == []
+    assert declined_flags(lowered[0])[0].suggested_production_rate_code == "PR-GRILLE-RET"
+
+
+def test_llm_confidence_and_rationale_are_kept_on_the_line(sample_rate_card):
+    mapped, _ = run_mapping(
+        [bid_line()],
+        [standard("L001", "PR-TSTAT-PROG", confidence="medium", rationale="No model stated.")],
+        sample_rate_card,
+    )
+
+    assert mapped[0].mapping_confidence == "medium"
+    assert mapped[0].mapping_rationale == "No model stated."

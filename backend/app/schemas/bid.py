@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 Severity = Literal["info", "warning", "blocker"]
 ComponentType = Literal["labor", "material", "equipment"]
+Confidence = Literal["high", "medium", "low"]
 
 
 class Flag(BaseModel):
@@ -15,6 +16,12 @@ class Flag(BaseModel):
     severity: Severity
     code: str
     message: str
+    # Set on STANDARD_RATE_DECLINED: the company production rate the reviewer
+    # can apply instead of the LLM's own numbers.
+    suggested_production_rate_code: str | None = None
+    # True once a reviewer has dealt with the flag (see pricing/reviewer.py).
+    # Resolved flags stay on the line but no longer count or block approval.
+    resolved: bool = False
 
 
 class LineItemComponent(BaseModel):
@@ -46,3 +53,7 @@ class BidLineItem(BaseModel):
     # Mapping assumptions (one per component, e.g. labor hours per unit) for
     # the reviewer. Display only: the engine copies them through untouched.
     assumptions: list[str] = Field(default_factory=list)
+    # The LLM's confidence in, and one-line reason for, its mapping of this
+    # line. None if it returned no mapping or a reviewer chose the rate.
+    mapping_confidence: Confidence | None = None
+    mapping_rationale: str | None = None

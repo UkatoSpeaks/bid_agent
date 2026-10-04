@@ -98,8 +98,11 @@ def test_pipeline_parses_extracts_maps_and_prices(sample_rate_card):
         ("L001", "warning", "HIGH_IMPACT_LINE"),
         ("L002", "blocker", "QUANTITY_NOT_IN_SOURCE"),
         ("L002", "blocker", "ASSUMED_PRODUCTION_RATE"),
+        # The company has a rate for supply registers that the LLM did not use.
+        ("L002", "warning", "STANDARD_RATE_DECLINED"),
         ("L002", "warning", "HIGH_IMPACT_LINE"),
     ]
+    assert estimate.all_flags[3].suggested_production_rate_code == "PR-REG-SUP"
 
     # direct labor 690.00, direct material 870.00 + 925.00 = 1,795.00
     # markup = 1,795.00 x 15%                = 269.25
@@ -115,12 +118,15 @@ def test_pipeline_parses_extracts_maps_and_prices(sample_rate_card):
     #   standard share = 1,763.03625 / 2,903.908125 = 60.71% -> 60.7
     review = estimate.review
     assert (review.standard_rate_pct, review.assumed_rate_pct) == (D("60.7"), D("39.3"))
-    assert (review.blocker_count, review.warning_count) == (2, 2)
+    assert (review.blocker_count, review.warning_count) == (2, 3)
+    assert review.ready_to_approve is False
     assert review.high_impact_line_ids == ["L001", "L002"]
 
     assert [(row.source_ref, row.reason) for row in estimate.skipped_rows] == [
         ("Bid Schedule!R1", "column header row")
     ]
+    # The mapped lines travel with the estimate: they are what a reprice takes.
+    assert estimate.source_lines == result.lines
 
 
 def assert_foots(estimate):

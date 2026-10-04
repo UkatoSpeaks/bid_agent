@@ -6,6 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from app.extraction import SkippedLine, extract_line_items, map_line_items
+from app.extraction.map import DEFAULT_DECLINED_RATE_SCORE
 from app.llm import LLMClient
 from app.parsing import ParsedDocument, parse_bid_document
 from app.pricing import DEFAULT_HIGH_IMPACT_PCT, price_estimate, review_estimate
@@ -26,6 +27,7 @@ def draft_estimate(
     rate_card: RateCard,
     llm: LLMClient,
     high_impact_pct: Decimal = DEFAULT_HIGH_IMPACT_PCT,
+    declined_rate_score: float = DEFAULT_DECLINED_RATE_SCORE,
 ) -> DraftResult:
     """Turn a bid document into a draft estimate.
 
@@ -35,7 +37,7 @@ def draft_estimate(
     """
     document = parse_bid_document(path)
     extraction = extract_line_items(document, llm)
-    lines = map_line_items(extraction.lines, rate_card, llm)
+    lines = map_line_items(extraction.lines, rate_card, llm, declined_rate_score)
     estimate = review_estimate(price_estimate(lines, rate_card), rate_card, high_impact_pct)
     estimate = estimate.model_copy(
         update={
@@ -46,7 +48,8 @@ def draft_estimate(
                     reason=skipped.reason,
                 )
                 for skipped in extraction.skipped
-            ]
+            ],
+            "source_lines": lines,
         }
     )
     return DraftResult(

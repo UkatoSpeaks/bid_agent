@@ -84,12 +84,8 @@ def review_estimate(
             line.model_copy(update={"flags": flags, "subtotal_share_pct": _pct(share)})
         )
 
-    all_flags = [
-        LineFlag(line_id=line.id, **flag.model_dump()) for line in lines for flag in line.flags
-    ]
-    counts = {"blocker": 0, "warning": 0, "info": 0}
-    for flag in all_flags:
-        counts[flag.severity] += 1
+    all_flags = collect_flags(lines)
+    counts = count_open_flags(all_flags)
 
     # The two shares are reported so that they add up to exactly 100.
     standard_pct = _pct(standard / total * HUNDRED) if total else ZERO
@@ -103,6 +99,7 @@ def review_estimate(
                 blocker_count=counts["blocker"],
                 warning_count=counts["warning"],
                 info_count=counts["info"],
+                ready_to_approve=is_ready_to_approve(lines, counts),
                 standard_rate_pct=standard_pct,
                 assumed_rate_pct=assumed_pct,
                 lines_on_standard_rates=_count(lines, "standard"),
@@ -113,6 +110,26 @@ def review_estimate(
             ),
         }
     )
+
+
+def collect_flags(lines: list[PricedLine]) -> list[LineFlag]:
+    return [
+        LineFlag(line_id=line.id, **flag.model_dump()) for line in lines for flag in line.flags
+    ]
+
+
+def count_open_flags(flags: list[LineFlag]) -> dict[str, int]:
+    """Unresolved flags per severity."""
+    counts = {"blocker": 0, "warning": 0, "info": 0}
+    for flag in flags:
+        if not flag.resolved:
+            counts[flag.severity] += 1
+    return counts
+
+
+def is_ready_to_approve(lines: list[PricedLine], counts: dict[str, int]) -> bool:
+    """No unresolved blocker, and at least one line left in the estimate."""
+    return counts["blocker"] == 0 and any(line.review_status != "excluded" for line in lines)
 
 
 def _upgrade(flag: Flag, share: Decimal) -> Flag:

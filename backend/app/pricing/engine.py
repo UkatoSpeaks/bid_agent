@@ -269,6 +269,8 @@ def _price_line(line: BidLineItem, index: _RateIndex, currency: str) -> PricedLi
         assumptions=list(line.assumptions),
         rate_basis=_rate_basis(line),
         production_rate_code=line.production_rate_code,
+        mapping_confidence=line.mapping_confidence,
+        mapping_rationale=line.mapping_rationale,
     )
 
 

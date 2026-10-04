@@ -10,8 +10,9 @@ quantities per unit. Those numbers are guesses, and every such line is
 flagged ASSUMED_PRODUCTION_RATE whatever confidence the LLM reports.
 """
 
+import re
 from decimal import Decimal
-from typing import Literal, NamedTuple
+from typing import NamedTuple
 
 from pydantic import BaseModel, Field
 from rapidfuzz import fuzz, process
@@ -21,6 +22,7 @@ from app.llm import LLMClient
 from app.schemas import (
     BidLineItem,
     ComponentType,
+    Confidence,
     Flag,
     LineItemComponent,
     ProductionRate,
@@ -36,8 +38,10 @@ PRODUCTION_RATE_SHORTLIST = 8
 # Lines per LLM call. Batching sends the candidate lists once per batch
 # instead of once per line, which matters on a tokens-per-minute limit.
 LINES_PER_CALL = 5
-
-Confidence = Literal["high", "medium", "low"]
+# If the LLM uses no production rate for a line although one scores at least
+# this (0-100, see declined_standard_rate), the line is flagged
+# STANDARD_RATE_DECLINED. Overridden by STANDARD_RATE_DECLINED_SCORE.
+DEFAULT_DECLINED_RATE_SCORE = 85.0
 
 
 class ProposedComponent(BaseModel):
@@ -112,7 +116,10 @@ Bid lines (line_id | item number | description | unit of the bid line):
 
 
 def map_line_items(
-    lines: list[BidLineItem], rate_card: RateCard, llm: LLMClient
+    lines: list[BidLineItem],
+    rate_card: RateCard,
+    llm: LLMClient,
+    declined_rate_score: float = DEFAULT_DECLINED_RATE_SCORE,
 ) -> list[BidLineItem]:
     """Return copies of `lines` with components, assumptions and mapping flags."""
     mapped: list[BidLineItem] = []
@@ -125,7 +132,9 @@ def map_line_items(
             rate_card,
         )
         response = llm.structured(prompt, LineMappings)
-        mapped.extend(verify_mappings(batch, response.lines, rate_card))
+        mapped.extend(
+            verify_mappings(batch, response.lines, rate_card, declined_rate_score)
+        )
     return mapped
 
 
@@ -216,8 +225,81 @@ def build_mapping_prompt(
     )
 
 
+def _match_text(text: str) -> str:
+    """'Supply registers' -> 'supply register': lower case, no punctuation, no plural s."""
+    words = re.findall(r"[a-z0-9]+", text.casefold())
+    return " ".join(
+        word[:-1] if len(word) > 3 and word.endswith("s") and not word.endswith("ss") else word
+        for word in words
+    )
+
+
+def declined_standard_rate(
+    line: BidLineItem, rate_card: RateCard, min_score: float = DEFAULT_DECLINED_RATE_SCORE
+) -> tuple[ProductionRate, float] | None:
+    """The production rate that looks most like `line`, if it scores `min_score` or more.
+
+    Used when the LLM mapped a line to no production rate. The score is
+    rapidfuzz's token_set_ratio (0-100) between the two descriptions with
+    case, punctuation and plural "s" removed, so "Supply registers" scores
+    100 against "Supply register, 10 x 6, installed". Only rates in the
+    line's own unit are considered: another unit could not be applied.
+    """
+    wanted = _match_text(line.description)
+    best: tuple[ProductionRate, float] | None = None
+    for rate in rate_card.production_rates:
+        if not units_match(line.unit, rate.unit):
+            continue
+        score = fuzz.token_set_ratio(wanted, _match_text(rate.description))
+        if score >= min_score and (best is None or score > best[1]):
+            best = (rate, score)
+    return best
+
+
+def expand_production_rate(
+    production_rate: ProductionRate, rate_card: RateCard
+) -> tuple[list[LineItemComponent], list[str]]:
+    """A production rate's components, and one assumption line for each."""
+    known = {(c.type, c.code): c for c in all_candidates(rate_card)}
+    components: list[LineItemComponent] = []
+    assumptions: list[str] = []
+    for standard in production_rate.components:
+        candidate = known[(standard.type, standard.rate_card_code)]
+        components.append(
+            LineItemComponent(
+                type=standard.type,
+                rate_card_code=standard.rate_card_code,
+                quantity_per_unit=standard.quantity_per_unit,
+            )
+        )
+        assumptions.append(
+            f"{standard.type.capitalize()} {standard.rate_card_code} "
+            f"({candidate.name}): {_number(standard.quantity_per_unit)} "
+            f"{candidate.unit} per {production_rate.unit} "
+            f"[company standard {production_rate.code}]"
+        )
+    return components, assumptions
+
+
+def unit_mismatch_flag(line: BidLineItem, production_rate: ProductionRate) -> Flag:
+    return Flag(
+        severity="blocker",
+        code="UNIT_MISMATCH",
+        message=(
+            f"The bid line is in '{line.unit}' "
+            f"({normalize_unit(line.unit) or 'no unit'}) but "
+            f"production rate {production_rate.code} is per "
+            f"{production_rate.unit}. Its components are not "
+            "priced; convert the quantity or choose another rate."
+        ),
+    )
+
+
 def verify_mappings(
-    lines: list[BidLineItem], mappings: list[LineMapping], rate_card: RateCard
+    lines: list[BidLineItem],
+    mappings: list[LineMapping],
+    rate_card: RateCard,
+    declined_rate_score: float = DEFAULT_DECLINED_RATE_SCORE,
 ) -> list[BidLineItem]:
     """Apply the LLM's mappings to the lines, keeping only what checks out.
 
@@ -242,6 +324,10 @@ def verify_mappings(
         * PROPOSED_COMPONENTS_IGNORED (info): the LLM chose a production rate
           and proposed components too; only the production rate is used.
         * MAPPING_MISSING (blocker): the LLM returned nothing for the line.
+        * STANDARD_RATE_DECLINED (warning): the LLM used no production rate
+          although one in the line's unit scores `declined_rate_score` or
+          more against the description (see declined_standard_rate). The
+          flag names that rate so the reviewer can apply it.
 
     Every component that is kept adds one entry to the line's `assumptions`.
     """
@@ -290,35 +376,12 @@ def verify_mappings(
                     f"per {production_rate.unit} [{mapping.confidence} confidence] {rationale}"
                 )
                 if units_match(line.unit, production_rate.unit):
-                    for standard in production_rate.components:
-                        candidate = known[(standard.type, standard.rate_card_code)]
-                        components.append(
-                            LineItemComponent(
-                                type=standard.type,
-                                rate_card_code=standard.rate_card_code,
-                                quantity_per_unit=standard.quantity_per_unit,
-                            )
-                        )
-                        assumptions.append(
-                            f"{standard.type.capitalize()} {standard.rate_card_code} "
-                            f"({candidate.name}): {_number(standard.quantity_per_unit)} "
-                            f"{candidate.unit} per {production_rate.unit} "
-                            f"[company standard {chosen}]"
-                        )
-                else:
-                    flags.append(
-                        Flag(
-                            severity="blocker",
-                            code="UNIT_MISMATCH",
-                            message=(
-                                f"The bid line is in '{line.unit}' "
-                                f"({normalize_unit(line.unit) or 'no unit'}) but "
-                                f"production rate {chosen} is per "
-                                f"{production_rate.unit}. Its components are not "
-                                "priced; convert the quantity or choose another rate."
-                            ),
-                        )
+                    components, component_assumptions = expand_production_rate(
+                        production_rate, rate_card
                     )
+                    assumptions.extend(component_assumptions)
+                else:
+                    flags.append(unit_mismatch_flag(line, production_rate))
                 if mapping.confidence == "low":
                     flags.append(
                         Flag(
@@ -412,6 +475,24 @@ def verify_mappings(
                             )
                         )
 
+                declined = declined_standard_rate(line, rate_card, declined_rate_score)
+                if declined:
+                    rate, score = declined
+                    flags.append(
+                        Flag(
+                            severity="warning",
+                            code="STANDARD_RATE_DECLINED",
+                            message=(
+                                "The LLM did not use a company production rate, but "
+                                f"{rate.code} ({rate.description}), per {rate.unit}, "
+                                f"matches this line's description (score {score:.0f} "
+                                f"of 100, threshold {declined_rate_score:.0f}). Apply "
+                                "it if it covers this work."
+                            ),
+                            suggested_production_rate_code=rate.code,
+                        )
+                    )
+
             if mapping.no_match_reason and mapping.no_match_reason.strip():
                 flags.append(
                     Flag(
@@ -428,6 +509,8 @@ def verify_mappings(
                     "flags": flags,
                     "assumptions": assumptions,
                     "production_rate_code": production_rate_code,
+                    "mapping_confidence": mapping.confidence if mapping else None,
+                    "mapping_rationale": (mapping.rationale.strip() or None) if mapping else None,
                 }
             )
         )
